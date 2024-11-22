@@ -15,6 +15,8 @@ public class JobScraperApp extends Application {
     public void start(Stage primaryStage) {
         // Step 1: Create a ListView to display job information
         ListView<String> jobListView = new ListView<>();
+        jobListView.setPrefWidth(600); // Set preferred width to ensure it starts with a width
+        jobListView.setMaxWidth(Double.MAX_VALUE); // Allow it to grow with the window
 
         // Step 2: Initialize scraper and get scraped data
         RekruteScraper scraper = new RekruteScraper();
@@ -26,6 +28,14 @@ public class JobScraperApp extends Application {
         // Step 4: Set up the layout and scene
         VBox root = new VBox(jobListView);
         Scene scene = new Scene(root, 600, 400);
+
+        // Make sure the window is resizable
+        primaryStage.setResizable(true);
+
+        // Stop the program when the "X" button is pressed
+        primaryStage.setOnCloseRequest(event -> {
+            System.exit(0); // Exit the program explicitly
+        });
 
         primaryStage.setTitle("Job Scraper");
         primaryStage.setScene(scene);
