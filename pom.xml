@@ -65,6 +65,7 @@
                     <target>22</target>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -84,6 +85,15 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <mainClass>gui.JobScraperApp</mainClass> <!-- Update this with the actual package name of your class -->
+                </configuration>
             </plugin>
         </plugins>
     </build>
