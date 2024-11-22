@@ -29,10 +29,10 @@ public class JobScraperApp extends Application {
         VBox root = new VBox(jobListView);
         Scene scene = new Scene(root, 600, 400);
 
-        // Make sure the window is resizable
+
         primaryStage.setResizable(true);
 
-        // Stop the program when the "X" button is pressed
+
         primaryStage.setOnCloseRequest(event -> {
             System.exit(0); // Exit the program explicitly
         });
