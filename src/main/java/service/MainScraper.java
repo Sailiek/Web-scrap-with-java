@@ -12,9 +12,11 @@ public class MainScraper {
 
         long startTime = System.nanoTime(); // Start time
 
-        scrapers.add(new RekruteScraper());
+        //scrapers.add(new RekruteScraper());
 
-        scrapers.add(new MarocemploiScraper());
+        //scrapers.add(new MarocemploiScraper());
+
+        scrapers.add(new Mjob_Skuld_Operation());
 
 
 

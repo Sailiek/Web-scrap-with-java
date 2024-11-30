@@ -10,10 +10,11 @@ public class ScraperService {
 
     public ScraperService() {
         scrapers = new ArrayList<>();
-        scrapers.add(new RekruteScraper());
+        //scrapers.add(new RekruteScraper());
         //scrapers.add(new EmploiScraper());
-        scrapers.add(new MarocemploiScraper());
-        scrapers.add(new EmploiPublicScraper());
+        //scrapers.add(new MarocemploiScraper());
+        //scrapers.add(new EmploiPublicScraper());
+        scrapers.add(new Mjob_Skuld_Operation());
 
 
     }
