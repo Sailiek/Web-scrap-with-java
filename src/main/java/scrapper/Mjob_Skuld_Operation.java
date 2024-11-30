@@ -7,6 +7,7 @@ import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.*;
 
 public class Mjob_Skuld_Operation implements WebScraper {
 
@@ -57,11 +58,22 @@ public class Mjob_Skuld_Operation implements WebScraper {
             if (sec != null && element != null) {
                 try{
 
-                    Element title = element.select("ul.list-details > li:nth-child(1) > h3").first();
+                    Element title = element.select("h1.offer-title").first();
                     data.append("-Titre:").append(title.text()).append("\n");
 
                 }catch(Exception e){
                     data.append("-Titre:element not found!!").append("\n");
+                }
+
+
+
+                try{
+
+                    Element Company = element.select("ul.list-details > li:nth-child(1) > h3").first();
+                    data.append("-Company:").append(Company.text()).append("\n");
+
+                }catch(Exception e){
+                    data.append("-Company:element not found!!").append("\n");
                 }
 
 
@@ -85,25 +97,50 @@ public class Mjob_Skuld_Operation implements WebScraper {
                 }
 
 
-                try{
+                //try{
 
-                    Element experience = sec.select("div:nth-child(6) ").first();
-                    data.append("-Niveau expérience:").append(experience.text()).append("\n");
+                    //Element experience = sec.select("div:nth-child(14) ").first();
+                    //data.append("-Niveau expérience:").append(experience.text()).append("\n");
 
-                }catch(Exception e){
-                    data.append("-Niveau expérience:element not found!!").append("\n");
+                //}catch(Exception e){
+                    //data.append("-Niveau expérience:element not found!!").append("\n");
+                //}
+
+
+
+
+                String Exp = "(?<=\\bNiveau d'expériences requis :)(.*?)(?=\\bNiveau d'études exigé :)";
+                String Std = "(?<=Niveau d'études exigé :)(.*?)(?=\\bLangue\\(s\\) exigée\\(s\\) :)";
+
+
+
+                Pattern pattern = Pattern.compile(Exp);
+                Matcher matcher = pattern.matcher(sec.text());
+
+                Pattern patternS = Pattern.compile(Std);
+                Matcher matcherS = patternS.matcher(sec.text());
+
+                // Find and print the match
+                if (matcher.find()) {
+                    data.append("-Niveau d'experience :").append(matcher.group()).append("\n");
                 }
 
-                try{
-
-                    Element studylvl = sec.select("div:nth-child(7) ").first();
-                    data.append("-Niveau étude:").append(studylvl.text()).append("\n");
-
-                }catch(Exception e){
-                    data.append("-Niveau étude:element not found!!").append("\n");
+                if (matcherS.find()) {
+                    data.append("-Niveau d'étude :").append(matcherS.group(1).trim()).append("\n");
                 }
 
-                data.append(url).append("\n");
+
+
+                //try{
+
+                    //Element studylvl = sec.select("div:nth-child(15) ").first();
+                    //data.append("-Niveau d'étude:").append(studylvl.text()).append("\n");
+
+                //}catch(Exception e){
+                    //data.append("-Niveau d'étude:element not found!!").append("\n");
+                //}
+
+                data.append("-Lien:").append(url).append("\n");
             }
 
 
