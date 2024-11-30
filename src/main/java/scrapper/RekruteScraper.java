@@ -56,7 +56,7 @@ public class RekruteScraper implements WebScraper {
     // Method to get all job links from the main page
     private List<String> getJobLinksFromMainPage() {
         List<String> jobLinks = new ArrayList<>();
-        int numPageToScrap = 20;
+        int numPageToScrap = 5;
 
         try {
             for (int pageNumber = 1; pageNumber <= numPageToScrap; pageNumber++) {
