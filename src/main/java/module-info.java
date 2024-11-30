@@ -13,6 +13,7 @@ module project.projetjava {
 
     // Add jsoup dependency
     requires org.jsoup;
+    requires java.sql;
 
     // Open the gui package to javafx.graphics
     opens gui to javafx.graphics;

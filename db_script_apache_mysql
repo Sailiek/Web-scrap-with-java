@@ -1,0 +1,12 @@
+create DATABASE WebScrap;
+use WebScrap;
+
+create TABLE offre (
+	id int AUTO_INCREMENT PRIMARY KEY NOT NULL,
+	Titre VARCHAR(50),
+	Localisation VARCHAR(50),
+	Contrat VARCHAR(50), 
+	Niveau_Etude VARCHAR(50),
+	Experience VARCHAR(100),
+	Link VARCHAR(100)
+);

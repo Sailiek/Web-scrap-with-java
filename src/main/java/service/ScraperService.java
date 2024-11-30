@@ -5,7 +5,6 @@ import java.util.List;
 
 import scrapper.EmploiScraper;
 import scrapper.WebScraper;
-
 public class ScraperService {
     private final List<WebScraper> scrapers;
 
@@ -15,6 +14,7 @@ public class ScraperService {
         scrapers.add(new EmploiScraper());
         //scrapers.add(new MarocemploiScraper());
         //scrapers.add(new EmploiPublicScraper());
+        //scrapers.add(new Mjob_Skuld_Operation());
 
 
     }

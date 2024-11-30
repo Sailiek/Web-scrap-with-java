@@ -69,8 +69,9 @@ public class EmploiScraper implements WebScraper{
 
 
                         // URL
-                        result.append("URL : ").append(jobUrl).append("\n \n");
+            result.append("URL : ").append(jobUrl).append("\n \n");
 
+            result.append("Job Description : \n" );            
             // Extract sections within card-block-content
             Elements sections = detailPage.select("div.card-block-content > section");
     

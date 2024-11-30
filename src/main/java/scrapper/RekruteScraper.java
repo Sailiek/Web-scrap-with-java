@@ -23,42 +23,28 @@ public class RekruteScraper implements WebScraper {
             Element titleElement = jobDoc.select("h1").first();
             jobInfo.append("Titre Annonce: ").append((titleElement != null) ? titleElement.text() : "No title found").append("\n");
 
-            Element targetDiv = jobDoc.select("div.contentbloc").first() ;
-            Element introToSocieteElement = targetDiv.select("div#recruiterDescription").first();
-            jobInfo.append("Intro Societe: ").append((introToSocieteElement != null) ?introToSocieteElement.text() : "No intro societe found").append("\n");
-
-            Element descriptionPosteElement = targetDiv.select("div.col-md-12.blc").eq(4).first();  // Adjust for job description
-            jobInfo.append("Description Offre: ").append((descriptionPosteElement != null) ? descriptionPosteElement.text() : "No description found").append("\n");
-
-            Element SkillsPosteElement = targetDiv.select("div.col-md-12.blc").eq(5).first();  // Adjust for job description
-            jobInfo.append("Skills requis: ").append((SkillsPosteElement != null) ? SkillsPosteElement.text() : "No description found").append("\n");
-
-            Element softSkills = targetDiv.select("div.col-md-12.blc > p").first();
-
-// Check if the <p> element is found
-            if (softSkills != null) {
-                // Select all <span> elements inside the <p>
-                Elements spanElements = softSkills.select("span");
-
-                // Create a list to store the soft skills
-                List<String> softSkillsList = new ArrayList<>();
-
-                // Loop through the span elements and extract text
-                for (Element span : spanElements) {
-                    String skill = span.text();  // Extract the text from each <span>
-                    softSkillsList.add(skill);   // Add the skill to the list
-                }
-
-                // Optionally, if you want to present them as a string (e.g., comma-separated):
-                String softSkillsText = String.join(", ", softSkillsList);
-
-                // Append soft skills to the jobInfo StringBuilder or use as needed
-                jobInfo.append("Soft Skills: ").append(softSkillsText).append("\n");
-            } else {
-                jobInfo.append("No soft skills found\n");
-            }
+            Element targetDiv = jobDoc.select("div.contentbloc").first();
+            Element introToSocieteElement = targetDiv.select("div#recruiterDescription p").first();
+            jobInfo.append("Societe: ").append((introToSocieteElement != null) ? introToSocieteElement.text() : "No intro societe found").append("\n");
 
 
+//            Element descriptionPosteElement = targetDiv.select("div.col-md-12.blc ").eq(4).first();
+//            jobInfo.append("Description Offre: ").append((descriptionPosteElement != null) ? descriptionPosteElement.text() : "No description found").append("\n");
+
+//            Element SkillsPosteElement = targetDiv.select("div.col-md-12.blc").eq(5).first();
+//            jobInfo.append("Skills requis: ").append((SkillsPosteElement != null) ? SkillsPosteElement.text() : "No description found").append("\n");
+
+            Element exp_niveauEtudeDiv = jobDoc.select("ul.featureInfo").first();
+            Element nivEtdude = exp_niveauEtudeDiv.select("li").eq(2).first();
+            jobInfo.append("Niveau d'étude et formation :").append((nivEtdude !=null) ? nivEtdude.text():"not found").append("\n");
+
+            Element experience = exp_niveauEtudeDiv.select("li").eq(0).first();
+            jobInfo.append("Experience :").append((experience !=null) ? experience.text():"not found").append("\n");
+
+            Element typeContrat = jobDoc.select("ul.featureInfo > li > span.tagContrat").eq(0).first();
+            jobInfo.append("Contrat : ").append((typeContrat != null) ? typeContrat.text() : "not found").append("\n");
+
+            jobInfo.append("Lien de l'offre: ").append(jobUrl).append("\n");
         } catch (Exception e) {
             e.printStackTrace();
             return "Error scraping job details from: " + jobUrl;
@@ -70,7 +56,7 @@ public class RekruteScraper implements WebScraper {
     // Method to get all job links from the main page
     private List<String> getJobLinksFromMainPage() {
         List<String> jobLinks = new ArrayList<>();
-        int numPageToScrap = 5;
+        int numPageToScrap = 20;
 
         try {
             for (int pageNumber = 1; pageNumber <= numPageToScrap; pageNumber++) {
