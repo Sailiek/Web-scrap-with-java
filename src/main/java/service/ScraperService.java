@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import scrapper.EmploiScraper;
+import scrapper.RekruteScraper;
 import scrapper.WebScraper;
 public class ScraperService {
     private final List<WebScraper> scrapers;
 
     public ScraperService() {
         scrapers = new ArrayList<>();
-        //scrapers.add(new RekruteScraper());
-        scrapers.add(new EmploiScraper());
+        scrapers.add(new RekruteScraper());
+        //scrapers.add(new EmploiScraper());
         //scrapers.add(new MarocemploiScraper());
         //scrapers.add(new EmploiPublicScraper());
         //scrapers.add(new Mjob_Skuld_Operation());
