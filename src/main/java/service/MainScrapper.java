@@ -6,17 +6,19 @@ import java.util.List;
 import scrapper.*;
 
 
-public class MainScraper {
+public class MainScrapper {
     public static void main(String[] args) {
         List<WebScraper> scrapers = new ArrayList<>();
 
         long startTime = System.nanoTime(); // Start time
 
-        //scrapers.add(new RekruteScraper());
+       scrapers.add(new RekruteScraper());
+//        scrapers.add(new EmploiScraper());
+//        scrapers.add(new MarocemploiScraper());
+//
+//        scrapers.add(new EmploiPublicScraper());
+//        scrapers.add(new Mjob_Skuld_Operation());
 
-        //scrapers.add(new MarocemploiScraper());
-
-        scrapers.add(new Mjob_Skuld_Operation());
 
 
 

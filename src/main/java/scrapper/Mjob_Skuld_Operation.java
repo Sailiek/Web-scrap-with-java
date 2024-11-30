@@ -122,9 +122,9 @@ public class Mjob_Skuld_Operation implements WebScraper {
         List<String> urllist = new ArrayList<>();
         String M_job = "https://www.m-job.ma/recherche";
 
-
+        int nombreDePage =1;
         int i =0;
-        while (i<1){
+        while (i<nombreDePage){
 
             urllist = getthaturl(M_job);
             for (String url : urllist) {
