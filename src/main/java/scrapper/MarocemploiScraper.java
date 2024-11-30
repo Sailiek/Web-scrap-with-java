@@ -8,8 +8,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MarocemploiScraper implements WebScraper{
 
@@ -56,7 +54,26 @@ private List<String> getJobLinksFromMainPage() {
             Element titleElement = detailPage.selectFirst("figure.jobsearch-jobdetail-list h1");
             String jobTitle = titleElement != null ? titleElement.text() : "No Job Title";
             result.append("Job Title: ").append(jobTitle).append("\n");
-    
+            //extract company name
+            Element a_company = detailPage.selectFirst("figure.jobsearch-jobdetail-list > figcaption > span > a");
+            String company = a_company.text();
+            result.append("Company : ").append(company).append("\n");
+
+
+            //Localisation :
+            Element loc = detailPage.selectFirst(" ul.jobsearch-jobdetail-options > li> a.jobsearch-jobdetail-view");
+            String Localisation = loc.attr("href");           
+            result.append("Localisation :").append(Localisation).append("\n");
+
+            //type de contrtat
+            Element type_contrtat = detailPage.selectFirst("figure.jobsearch-jobdetail-list > figcaption > span > small > a");
+            String contrat = type_contrtat.text();
+             result.append("type de contrtat : ").append(contrat).append("\n");
+             
+            //JOb url
+            result.append("URL : ").append(jobUrl).append("\n \n");
+
+             
             // Extract job description details (new structure)
             Elements descriptionElements = detailPage.select("div.jobsearch-jobdetail-content > div.jobsearch-description");
     

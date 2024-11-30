@@ -12,39 +12,26 @@ import org.jsoup.select.Elements;
 public class EmploiScraper implements WebScraper{
 
 
-private List<String> getJobLinksFromMainPage() {
-        List<String> jobLinks = new ArrayList<>();
-        int numPageToScrap = 2;
-
-        try {
-            String url;
-            String baseurl ="https://www.emploi.ma/recherche-jobs-maroc";
-            for (int pageNumber = 0; pageNumber < numPageToScrap; pageNumber++) {
-                 if (pageNumber==0){
-                    url = baseurl;}
-                else{
-                    url = baseurl + "?page=" + pageNumber;
-
+    private List<String> getJobLinksFromMainPage() {
+        List<String> jobLinks = new ArrayList<>();  
+        
+        int NUMBER_OF_PAGES_TO_SCRAPE = 2;
+        String BASE_URL ="https://www.emploi.ma/recherche-jobs-maroc";
+        for (int pageNumber = 0; pageNumber < NUMBER_OF_PAGES_TO_SCRAPE; pageNumber++) {
+            String url = pageNumber == 0? BASE_URL : BASE_URL + "?page=" + pageNumber;
+            try {
+                Document doc = Jsoup.connect(url).get();
+                Elements jobCards = doc.select("div.page-search-jobs-content > div.card.card-job[data-href]");
+                for (Element card : jobCards) {
+                    String jobUrl = card.attr("data-href");
+                    jobLinks.add(jobUrl);
                 }
-                
-                    Document doc = Jsoup.connect(url).get();
-    
-        // Step 1: Fetch the jobs page and extract URLs from the `data-href` attribute
-        Document jobsPage = Jsoup.connect(url).get();
-        Elements jobCards = jobsPage.select("div.page-search-jobs-content > div.card.card-job[data-href]");
-    
-
-        // Store job detail page URLs
-        for (Element card : jobCards) {
-            String jobUrl = card.attr("data-href");
-            jobLinks.add(jobUrl);
+                Thread.sleep(1000); // wait for 1 second
+            } catch (IOException | InterruptedException e) {
+                System.err.println("Error fetching job links from page " + pageNumber + ": " + e.getMessage());
+            }
         }
-
-    }
-} catch (IOException e) {
-     e.printStackTrace();
-}
-     return jobLinks; 
+        return jobLinks;
     }
 
     private String scrapeJobDetails(String jobUrl) {
@@ -58,7 +45,32 @@ private List<String> getJobLinksFromMainPage() {
             Element titleElement = detailPage.selectFirst(" div.container > h1");
             String jobTitle = titleElement != null ? titleElement.text() : "No Job Title";
             result.append("Job Title: ").append(jobTitle).append("\n");
-    
+            
+            //company
+            Element a_company = detailPage.selectFirst("div.card-block-company > ul > li > h3 > a");
+            String company = a_company != null ? a_company.text() : "No Company Name";
+            result.append("Company: ").append(company).append("\n");
+            
+           // Location
+            Element localisation = detailPage.selectFirst("li.withicon.location-dot");
+            result.append("Localisation: ").append(localisation != null ? localisation.text().trim() : "No Location Found").append("\n");
+
+            // Contract Type
+            Element type_contrat = detailPage.selectFirst("li.withicon.file-signature");
+            result.append("Contract Type: ").append(type_contrat != null ? type_contrat.text().trim() : "No Contract Type Found").append("\n");
+
+            // Study Level
+            Element niveau_etude = detailPage.selectFirst("li.withicon.graduation-cap");
+            result.append("Study Level: ").append(niveau_etude != null ? niveau_etude.text().trim() : "No Study Level Found").append("\n");
+
+            // Experience Level
+            Element niveau_exp = detailPage.selectFirst("li.withicon.chart");
+            result.append("Experience Level: ").append(niveau_exp != null ? niveau_exp.text().trim() : "No Experience Level Found").append("\n");
+
+
+                        // URL
+                        result.append("URL : ").append(jobUrl).append("\n \n");
+
             // Extract sections within card-block-content
             Elements sections = detailPage.select("div.card-block-content > section");
     

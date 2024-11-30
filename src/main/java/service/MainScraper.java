@@ -3,7 +3,8 @@ package service;
 import java.util.ArrayList;
 import java.util.List;
 
-import scrapper.*;
+import scrapper.EmploiScraper;
+import scrapper.WebScraper;
 
 
 public class MainScraper {
@@ -12,9 +13,10 @@ public class MainScraper {
 
         long startTime = System.nanoTime(); // Start time
 
-        scrapers.add(new RekruteScraper());
+       // scrapers.add(new RekruteScraper());
 
-        scrapers.add(new MarocemploiScraper());
+       // scrapers.add(new MarocemploiScraper());
+       scrapers.add(new EmploiScraper());
 
 
 
