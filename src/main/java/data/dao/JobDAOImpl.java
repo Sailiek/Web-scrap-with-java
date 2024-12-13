@@ -17,7 +17,7 @@ public class JobDAOImpl implements JobDAO {
 
     @Override
     public void saveJob(Job job) {
-        String query = "INSERT INTO jobs (title, company, description, education_level, experience, contract_type, job_link) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO jobs (title, company, description, education_level, experience, localisation,contract_type, job_link,jobDetails) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, job.getTitle());
@@ -25,8 +25,10 @@ public class JobDAOImpl implements JobDAO {
             stmt.setString(3, job.getDescription());
             stmt.setString(4, job.getEducationLevel());
             stmt.setString(5, job.getExperience());
-            stmt.setString(6, job.getContractType());
-            stmt.setString(7, job.getJobLink());
+            stmt.setString(6, job.getLocalisation());
+            stmt.setString(7, job.getContractType());
+            stmt.setString(8, job.getJobLink());
+            stmt.setString(9, job.getJobDetails());
             stmt.executeUpdate();
             System.out.println("Inserting job: " + job);
             System.out.println("Query: " + query);
@@ -49,8 +51,10 @@ public class JobDAOImpl implements JobDAO {
                         resultSet.getString("description"),
                         resultSet.getString("education_level"),
                         resultSet.getString("experience"),
+                        resultSet.getString("localisation"),
                         resultSet.getString("contract_type"),
-                        resultSet.getString("job_link")
+                        resultSet.getString("job_link"),
+                        resultSet.getString("jobDetails")
                 );
                 jobs.add(job);
             }

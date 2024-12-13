@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 
 public class DbConnection {
     public static void main(String[] args) {
-        String jdbcUrl = "jdbc:mysql://localhost:3306/WebScrap";
+        String jdbcUrl = "jdbc:mysql://localhost:3306/webscrapdb";
         String username = "root";
         String password = "";
 

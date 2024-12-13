@@ -2,7 +2,9 @@ package scrapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -15,7 +17,7 @@ public class EmploiScraper implements WebScraper{
     private List<String> getJobLinksFromMainPage() {
         List<String> jobLinks = new ArrayList<>();  
         
-        int NUMBER_OF_PAGES_TO_SCRAPE = 2;
+        int NUMBER_OF_PAGES_TO_SCRAPE = 10;
         String BASE_URL ="https://www.emploi.ma/recherche-jobs-maroc";
         for (int pageNumber = 0; pageNumber < NUMBER_OF_PAGES_TO_SCRAPE; pageNumber++) {
             String url = pageNumber == 0? BASE_URL : BASE_URL + "?page=" + pageNumber;
@@ -51,6 +53,14 @@ public class EmploiScraper implements WebScraper{
             String company = a_company != null ? a_company.text() : "No Company Name";
             result.append("Company: ").append(company).append("\n");
             
+            // Study Level
+            Element niveau_etude = detailPage.selectFirst("li.withicon.graduation-cap");
+            result.append("Study Level: ").append(niveau_etude != null ? niveau_etude.text().trim() : "No Study Level Found").append("\n");
+            
+            // Experience Level
+            Element niveau_exp = detailPage.selectFirst("li.withicon.chart");
+            result.append("Experience Level: ").append(niveau_exp != null ? niveau_exp.text().trim() : "No Experience Level Found").append("\n");
+
            // Location
             Element localisation = detailPage.selectFirst("li.withicon.location-dot");
             result.append("Localisation: ").append(localisation != null ? localisation.text().trim() : "No Location Found").append("\n");
@@ -59,19 +69,29 @@ public class EmploiScraper implements WebScraper{
             Element type_contrat = detailPage.selectFirst("li.withicon.file-signature");
             result.append("Contract Type: ").append(type_contrat != null ? type_contrat.text().trim() : "No Contract Type Found").append("\n");
 
-            // Study Level
-            Element niveau_etude = detailPage.selectFirst("li.withicon.graduation-cap");
-            result.append("Study Level: ").append(niveau_etude != null ? niveau_etude.text().trim() : "No Study Level Found").append("\n");
 
-            // Experience Level
-            Element niveau_exp = detailPage.selectFirst("li.withicon.chart");
-            result.append("Experience Level: ").append(niveau_exp != null ? niveau_exp.text().trim() : "No Experience Level Found").append("\n");
+            // URL
+            result.append("URL : ").append(jobUrl).append("\n");
+
+            // Job Details
+
+            Element a_jobDetails = detailPage.selectFirst("div.field-items div.field-item");
+            String jobDetails = a_jobDetails != null ? a_jobDetails.text() : "No Job Details Name";
+
+            // Convert the scraped result into a list
+            List<String> jobDetailsList = Arrays.stream(jobDetails.split(","))
+                                                .map(String::trim) // Remove extra spaces
+                                                .collect(Collectors.toList());
+
+            result.append("Job Details : ").append(jobDetailsList).append("\n");
+
+            // Print the list to verify
+            
 
 
-                        // URL
-            result.append("URL : ").append(jobUrl).append("\n \n");
 
-            result.append("Job Description : \n" );            
+            // Desrciption
+            //result.append("Job Description : \n" );            
             // Extract sections within card-block-content
             Elements sections = detailPage.select("div.card-block-content > section");
     
@@ -79,7 +99,7 @@ public class EmploiScraper implements WebScraper{
                 // Extract the header (h3)
                 Element header = section.selectFirst("h3");
                 String sectionTitle = header != null ? header.text() : "No Section Title";
-                result.append("Section: ").append(sectionTitle).append("\n");
+               // result.append("Section: ").append(sectionTitle).append("\n");
     
                 // Extract the content (can be <p>, <ul>, etc.)
                 Element content = section.selectFirst("div");
@@ -88,18 +108,18 @@ public class EmploiScraper implements WebScraper{
                         // Extract all list items if <ul> exists
                         Elements listItems = content.select("ul > li");
                         for (Element listItem : listItems) {
-                            result.append(" - ").append(listItem.text()).append("\n");
+                          //  result.append(" - ").append(listItem.text()).append("\n");
                         }
                     } else if (content.selectFirst("p") != null) {
                         // Extract paragraph content if <p> exists
-                        result.append(" - ").append(content.selectFirst("p").text()).append("\n");
+                        //result.append(" - ").append(content.selectFirst("p").text()).append("\n");
                     } else {
-                        result.append(" - No content available in this section.\n");
+                       // result.append(" - No content available in this section.\n");
                     }
                 }
             }
     
-            result.append("-----------------------------\n");
+          //  result.append("-----------------------------\n");
     
         } catch (IOException e) {
             result.append("Error scraping job details from: ").append(jobUrl).append("\n");

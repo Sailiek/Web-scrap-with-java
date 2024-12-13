@@ -1,13 +1,14 @@
 package scrapper;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.*;
 
 public class Mjob_Skuld_Operation implements WebScraper {
 
@@ -59,7 +60,7 @@ public class Mjob_Skuld_Operation implements WebScraper {
                 try{
 
                     Element title = element.select("h1.offer-title").first();
-                    data.append("-Titre:").append(title.text()).append("\n");
+                    data.append("Job Title: ").append(title.text()).append("\n");
 
                 }catch(Exception e){
                     data.append("-Titre:element not found!!").append("\n");
@@ -70,17 +71,45 @@ public class Mjob_Skuld_Operation implements WebScraper {
                 try{
 
                     Element Company = element.select("ul.list-details > li:nth-child(1) > h3").first();
-                    data.append("-Company:").append(Company.text()).append("\n");
+                    data.append("Company: ").append(Company.text()).append("\n");
 
                 }catch(Exception e){
                     data.append("-Company:element not found!!").append("\n");
                 }
 
+                
+
+                String Exp = "(?<=\\bNiveau d'expériences requis :)(.*?)(?=\\bNiveau d'études exigé :)";
+                String Std = "(?<=Niveau d'études exigé :)(.*?)(?=\\bLangue\\(s\\) exigée\\(s\\) :)";
+
+
+
+                Pattern pattern = Pattern.compile(Exp);
+                Matcher matcher = pattern.matcher(sec.text());
+
+                Pattern patternS = Pattern.compile(Std);
+                Matcher matcherS = patternS.matcher(sec.text());
+
+                // Find and print the match
+                
+
+                if (matcherS.find()) {
+                    data.append("Study Level: ").append(matcherS.group(1).trim()).append("\n");
+                }else{
+                    data.append("-Niveau d'experience :element not found!!").append("\n");
+                }
+                
+                if (matcher.find()) {
+                    data.append("Experience Level: ").append(matcher.group()).append("\n");
+                }
+                else{
+                    data.append("-Niveau d'experience :element not found!!").append("\n");
+                }
 
                 try{
 
                     Element location = element.select("div.location > span").first();
-                    data.append("-Localisation:").append(location.text()).append("\n");
+                    data.append("Localisation: ").append(location.text()).append("\n");
 
                 }catch(Exception e){
                     data.append("-Localisation:element not found!!").append("\n");
@@ -90,7 +119,7 @@ public class Mjob_Skuld_Operation implements WebScraper {
                 try{
 
                     Element contract = element.select("ul.list-details > li:nth-child(2) > h3").first();
-                    data.append("-Contrat:").append(contract.text()).append("\n");
+                    data.append("Contract Type: ").append(contract.text()).append("\n");
 
                 }catch(Exception e){
                     data.append("-Contrat:element not found!!").append("\n");
@@ -108,27 +137,7 @@ public class Mjob_Skuld_Operation implements WebScraper {
 
 
 
-
-                String Exp = "(?<=\\bNiveau d'expériences requis :)(.*?)(?=\\bNiveau d'études exigé :)";
-                String Std = "(?<=Niveau d'études exigé :)(.*?)(?=\\bLangue\\(s\\) exigée\\(s\\) :)";
-
-
-
-                Pattern pattern = Pattern.compile(Exp);
-                Matcher matcher = pattern.matcher(sec.text());
-
-                Pattern patternS = Pattern.compile(Std);
-                Matcher matcherS = patternS.matcher(sec.text());
-
-                // Find and print the match
-                if (matcher.find()) {
-                    data.append("-Niveau d'experience :").append(matcher.group()).append("\n");
-                }
-
-                if (matcherS.find()) {
-                    data.append("-Niveau d'étude :").append(matcherS.group(1).trim()).append("\n");
-                }
-
+               
 
 
                 //try{
@@ -140,7 +149,7 @@ public class Mjob_Skuld_Operation implements WebScraper {
                     //data.append("-Niveau d'étude:element not found!!").append("\n");
                 //}
 
-                data.append("-Lien:").append(url).append("\n");
+                data.append("URL : ").append(url).append("\n");
             }
 
 

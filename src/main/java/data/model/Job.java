@@ -9,19 +9,23 @@ public class Job {
     private String experience;
     private String contractType;
     private String jobLink;
+    private String jobDetails;
+    private String localisation;
 
-    public Job(String title, String company, String description, String educationLevel, String experience, String contractType, String jobLink) {
+    public Job(String title, String company, String description, String educationLevel, String experience, String localisation,String contractType, String jobLink, String jobDetails) {
         this.title = title;
         this.company = company;
         this.description = description;
         this.educationLevel = educationLevel;
         this.experience = experience;
+        this.localisation = localisation;
         this.contractType = contractType;
         this.jobLink = jobLink;
+        this.jobDetails = jobDetails;
     }
 
-    public Job(int id, String title, String company, String description, String educationLevel, String experience, String contractType, String jobLink) {
-        this(title, company, description, educationLevel, experience, contractType, jobLink);
+    public Job(int id, String title, String company, String description, String educationLevel, String experience,String localisation, String contractType, String jobLink, String jobDetails) {
+        this(title, company, description, educationLevel, experience,localisation, contractType, jobLink, jobDetails);
         this.id = id;
     }
 
@@ -88,5 +92,18 @@ public class Job {
 
     public void setJobLink(String jobLink) {
         this.jobLink = jobLink;
+    }
+
+    public String getJobDetails() {
+        return jobDetails;
+    }
+    public void setJobDetails(String jobDetails) {
+        this.jobDetails = jobDetails;
+    }
+    public String getLocalisation() {
+        return localisation;
+    }
+    public void setLocalisation(String localisation) {
+        this.localisation = localisation;
     }
 }

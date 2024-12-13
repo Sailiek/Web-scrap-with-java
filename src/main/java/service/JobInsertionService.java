@@ -15,16 +15,18 @@ public class JobInsertionService {
             try {
                 String[] parsedData = parseScrapedData(job);
 
-                if (parsedData != null && parsedData.length >= 6) {
+                if (parsedData != null && parsedData.length >=8) {
                     String title = parsedData[0];
                     String company = parsedData[1];
                     String education = parsedData[2];
                     String experience = parsedData[3];
-                    String contract = parsedData[4];
-                    String link = parsedData[5];
+                    String localisation = parsedData[4];
+                    String contract = parsedData[5];
+                    String link = parsedData[6];
+                    String jobDetails = parsedData[7];
 
                     // Create Job object
-                    Job newJob = new Job(title, company, "Description Placeholder", education, experience, contract, link);
+                    Job newJob = new Job(title, company, "Description Placeholder", education, experience,localisation ,contract, link, jobDetails);
 
                     // Save job to the database
                     jobDAOImpl.saveJob(newJob);
@@ -40,23 +42,22 @@ public class JobInsertionService {
 
 
     private String[] parseScrapedData(String job) {
-        // You should define how to split the job data
-        // For example, split by the known delimiters (like newline) and validate
-
         try {
             String[] lines = job.split("\n");
 
-            // Check if we have enough data (e.g., 6 fields)
-            if (lines.length >= 6) {
+            // Check if we have at least 7 fields
+            if (lines.length >= 8) {
                 String title = extractField(lines[0]);
                 String company = extractField(lines[1]);
                 String education = extractField(lines[2]);
                 String experience = extractField(lines[3]);
-                String contract = extractField(lines[4]);
-                String link = extractField(lines[5]);
+                String localisation = extractField(lines[4]);
+                String contract = extractField(lines[5]);
+                String link = extractField(lines[6]);
+                String jobDetails = extractField(lines[7]);
 
                 // Return the parsed data in an array
-                return new String[]{title, company, education, experience, contract, link};
+                return new String[]{title, company, education, experience,localisation ,contract, link, jobDetails};
             }
         } catch (Exception e) {
             System.err.println("Error while parsing job data: " + job);
@@ -65,6 +66,7 @@ public class JobInsertionService {
 
         return null; // Return null if the data is invalid
     }
+
 
     private String extractField(String field) {
         // Remove unwanted whitespace or other characters

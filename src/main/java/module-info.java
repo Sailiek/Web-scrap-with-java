@@ -20,5 +20,5 @@ module project.projetjava {
 
     // Export other packages
     opens project.projetjava to javafx.fxml;
-    exports project.projetjava;
+    
 }

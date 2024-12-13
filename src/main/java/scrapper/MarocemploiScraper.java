@@ -25,7 +25,7 @@ private List<String> getJobLinksFromMainPage() {
                 
                     Document doc = Jsoup.connect(url).get();
     
-        // Step 1: Fetch the jobs page and extract URLs from the `data-href` attribute
+        // Step 1: Fetch the jobs page and extract URLs from the data-href attribute
         Document jobsPage = Jsoup.connect(url).get();
         Elements jobCards = jobsPage.select("div.jobsearch-list-option > h2 > a ");
     
@@ -57,19 +57,22 @@ private List<String> getJobLinksFromMainPage() {
             //extract company name
             Element a_company = detailPage.selectFirst("figure.jobsearch-jobdetail-list > figcaption > span > a");
             String company = a_company.text();
-            result.append("Company : ").append(company).append("\n");
+            result.append("Company: ").append(company).append("\n");
 
+            result.append("Study Level: ").append("None");
+
+            result.append("Experience Level: ").append("None");
 
             //Localisation :
             Element loc = detailPage.selectFirst(" ul.jobsearch-jobdetail-options > li> a.jobsearch-jobdetail-view");
             String Localisation = loc.attr("href");           
-            result.append("Localisation :").append(Localisation).append("\n");
+            result.append("Localisation: ").append(Localisation).append("\n");
 
             //type de contrtat
             Element type_contrtat = detailPage.selectFirst("figure.jobsearch-jobdetail-list > figcaption > span > small > a");
             String contrat = type_contrtat.text();
-             result.append("type de contrtat : ").append(contrat).append("\n");
-             
+             result.append("Contract Type: ").append(contrat).append("\n");
+
             //JOb url
             result.append("URL : ").append(jobUrl).append("\n \n");
 
@@ -130,4 +133,3 @@ private List<String> getJobLinksFromMainPage() {
        getScrapedData().forEach(System.out::println);
     }
 }
-

@@ -1,13 +1,12 @@
 package scrapper;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RekruteScraper implements WebScraper {
 
@@ -21,11 +20,11 @@ public class RekruteScraper implements WebScraper {
 
             // Scraping details from the individual job offer page
             Element titleElement = jobDoc.select("h1").first();
-            jobInfo.append("Titre Annonce: ").append((titleElement != null) ? titleElement.text() : "No title found").append("\n");
+            jobInfo.append("Job Title: ").append((titleElement != null) ? titleElement.text() : "No title found").append("\n");
 
             Element targetDiv = jobDoc.select("div.contentbloc").first();
             Element introToSocieteElement = targetDiv.select("div#recruiterDescription p").first();
-            jobInfo.append("Societe: ").append((introToSocieteElement != null) ? introToSocieteElement.text() : "No intro societe found").append("\n");
+            jobInfo.append("Company: ").append((introToSocieteElement != null) ? introToSocieteElement.text() : "No intro societe found").append("\n");
 
 
 //            Element descriptionPosteElement = targetDiv.select("div.col-md-12.blc ").eq(4).first();
@@ -36,15 +35,48 @@ public class RekruteScraper implements WebScraper {
 
             Element exp_niveauEtudeDiv = jobDoc.select("ul.featureInfo").first();
             Element nivEtdude = exp_niveauEtudeDiv.select("li").eq(2).first();
-            jobInfo.append("Niveau d'étude et formation :").append((nivEtdude !=null) ? nivEtdude.text():"not found").append("\n");
+            jobInfo.append("Study Level: ").append((nivEtdude !=null) ? nivEtdude.text():"not found").append("\n");
 
             Element experience = exp_niveauEtudeDiv.select("li").eq(0).first();
-            jobInfo.append("Experience :").append((experience !=null) ? experience.text():"not found").append("\n");
+            jobInfo.append("Experience Level: ").append((experience !=null) ? experience.text():"not found").append("\n");
+
+            Element localisation = jobDoc.select("div.col-md-12.blc > span").eq(0).first();
+            jobInfo.append("Localisation: ")
+                    .append((localisation != null) ? localisation.text() : "not found")
+                    .append("\n");
+            List<String> jobDetails = new ArrayList<>();
+
 
             Element typeContrat = jobDoc.select("ul.featureInfo > li > span.tagContrat").eq(0).first();
-            jobInfo.append("Contrat : ").append((typeContrat != null) ? typeContrat.text() : "not found").append("\n");
+            jobInfo.append("Contract Type: ").append((typeContrat != null) ? typeContrat.text() : "not found").append("\n");
 
-            jobInfo.append("Lien de l'offre: ").append(jobUrl).append("\n");
+            jobInfo.append("URL :").append(jobUrl).append("\n");
+
+            Element fonctions = jobDoc.select("h2.h2italic").first();
+            if (fonctions != null) {
+                String mainText = fonctions.ownText(); // e.g., "Multimédia / Internet - Secteur Informatique"
+                mainText = mainText.replace("(métiers de la)", "").replace("(métiers de)", "").trim();
+                // Replace "/" with "," and remove "Secteur"
+                mainText = mainText.replace("/", ",").replace("Secteur", "").trim();
+
+                // Split the text by delimiters like "-" and ","
+                String[] parts = mainText.split("[-,]");
+
+                // Clean up each part and store in a list
+                List<String> result = new ArrayList<>();
+                for (String part : parts) {
+                    String cleanedPart = part.trim(); // Remove extra spaces
+                    if (!cleanedPart.isEmpty()) { // Ignore empty strings
+                        result.add(cleanedPart);
+                    }
+                }
+
+                // Print or return the final list
+                jobInfo.append("Job Details  :").append(result).append("\n");
+            } else {
+                System.out.println("<h2> element not found.");
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             return "Error scraping job details from: " + jobUrl;
@@ -56,7 +88,7 @@ public class RekruteScraper implements WebScraper {
     // Method to get all job links from the main page
     private List<String> getJobLinksFromMainPage() {
         List<String> jobLinks = new ArrayList<>();
-        int numPageToScrap = 5;
+        int numPageToScrap = 10;
 
         try {
             for (int pageNumber = 1; pageNumber <= numPageToScrap; pageNumber++) {

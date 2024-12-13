@@ -1,5 +1,8 @@
 package gui;
 
+import java.util.List;
+
+import data.model.Job;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -9,9 +12,6 @@ import javafx.stage.Stage;
 import service.JobInsertionService;
 import service.JobRetrievalService;
 import service.ScraperService;
-import data.model.Job;
-
-import java.util.List;
 
 public class JobScraperApp extends Application {
 
