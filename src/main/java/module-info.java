@@ -18,6 +18,15 @@ module project.projetjava {
     // Open the gui package to javafx.graphics
     opens gui to javafx.graphics;
 
+    requires weka.stable;
+    requires java.base;
+    requires org.apache.commons.csv;
+
+    opens machine_learning;
+    exports machine_learning;
+
+
+
     // Export other packages
     opens project.projetjava to javafx.fxml;
     
