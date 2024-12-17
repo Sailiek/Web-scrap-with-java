@@ -4,6 +4,7 @@ import data.dao.JobDAO;
 import data.dao.JobDAOImpl;
 import data.model.Offer;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -15,15 +16,29 @@ public class JobInsertionService {
     }
 
     public void insertOffer(Offer offer) {
+        if (offer == null) {
+            throw new IllegalArgumentException("Offer cannot be null");
+        }
+        
+        if (offer.getTitre() == null || offer.getTitre().trim().isEmpty()) {
+            throw new IllegalArgumentException("Offer title cannot be empty");
+        }
+
         try {
             jobDAO.saveJob(offer);
         } catch (Exception e) {
-            System.err.println("Error while inserting offer: " + offer.getTitre());
+            String errorMessage = "Error while inserting offer: " + offer.getTitre();
+            System.err.println(errorMessage);
             e.printStackTrace();
+            throw new RuntimeException(errorMessage, e);
         }
     }
 
     public void insertOffers(List<Offer> offers) {
+        if (offers == null || offers.isEmpty()) {
+            throw new IllegalArgumentException("Offers list cannot be null or empty");
+        }
+
         for (Offer offer : offers) {
             insertOffer(offer);
         }
@@ -31,59 +46,77 @@ public class JobInsertionService {
 
     // Legacy method for backward compatibility
     public void insertJobs(List<String> jobData) {
+        if (jobData == null || jobData.isEmpty()) {
+            throw new IllegalArgumentException("Job data list cannot be null or empty");
+        }
+
         for (String job : jobData) {
             try {
                 String[] parsedData = parseScrapedData(job);
 
                 if (parsedData != null && parsedData.length >= 8) {
-                    // Create Date objects for publication and application dates
+                    // Get current date for publication date
                     Date currentDate = new Date();
+                    
+                    // Calculate application deadline (30 days from now)
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(currentDate);
+                    calendar.add(Calendar.DATE, 30);
+                    Date applicationDeadline = calendar.getTime();
 
                     // Create Offer object with all available fields
                     Offer newOffer = new Offer(
                         0, // id will be set by database
                         parsedData[0], // title
                         parsedData[6], // url
-                        "Unknown", // siteName
+                        "Legacy Import", // siteName
                         currentDate, // datePublication
-                        currentDate, // datePostuler
+                        applicationDeadline, // datePostuler
                         parsedData[4], // adresseEntreprise (using location)
-                        "", // siteWebEntreprise
+                        parsedData[6], // siteWebEntreprise (using URL as fallback)
                         parsedData[1], // nomEntreprise
-                        "", // descriptionEntreprise
+                        "N/A", // descriptionEntreprise
                         parsedData[7], // descriptionPoste
-                        "", // region
+                        "N/A", // region
                         parsedData[4], // ville (using location)
-                        "", // secteurActivite
-                        "", // metier
+                        "N/A", // secteurActivite
+                        "N/A", // metier
                         parsedData[5], // typeContrat
                         parsedData[2], // niveauEtudes
-                        "", // specialiteDiplome
+                        "N/A", // specialiteDiplome
                         parsedData[3], // experience
-                        "", // profilRecherche
-                        "", // traitsPersonnalite
-                        "", // competencesRequises
-                        "", // softSkills
-                        "", // competencesRecommandees
-                        "", // langue
-                        "", // niveauLangue
-                        "", // salaire
-                        "", // avantagesSociaux
+                        parsedData[7], // profilRecherche (using description)
+                        "N/A", // traitsPersonnalite
+                        "N/A", // competencesRequises
+                        "N/A", // softSkills
+                        "N/A", // competencesRecommandees
+                        "N/A", // langue
+                        "N/A", // niveauLangue
+                        "N/A", // salaire
+                        "N/A", // avantagesSociaux
                         false // teletravail
                     );
 
                     insertOffer(newOffer);
                 } else {
-                    System.out.println("Skipping invalid job data: " + job);
+                    String errorMessage = "Invalid job data format: " + job;
+                    System.err.println(errorMessage);
+                    throw new IllegalArgumentException(errorMessage);
                 }
             } catch (Exception e) {
-                System.err.println("Error while inserting job: " + job);
+                String errorMessage = "Error while inserting job: " + job;
+                System.err.println(errorMessage);
                 e.printStackTrace();
+                throw new RuntimeException(errorMessage, e);
             }
         }
     }
 
     private String[] parseScrapedData(String job) {
+        if (job == null || job.trim().isEmpty()) {
+            throw new IllegalArgumentException("Job data cannot be null or empty");
+        }
+
         try {
             String[] lines = job.split("\n");
 
@@ -97,17 +130,24 @@ public class JobInsertionService {
                 String link = extractField(lines[6]);
                 String jobDetails = extractField(lines[7]);
 
+                // Validate essential fields
+                if (title.isEmpty() || company.isEmpty()) {
+                    throw new IllegalArgumentException("Title and company are required fields");
+                }
+
                 return new String[]{title, company, education, experience, localisation, contract, link, jobDetails};
             }
         } catch (Exception e) {
-            System.err.println("Error while parsing job data: " + job);
+            String errorMessage = "Error while parsing job data: " + job;
+            System.err.println(errorMessage);
             e.printStackTrace();
+            throw new RuntimeException(errorMessage, e);
         }
 
         return null;
     }
 
     private String extractField(String field) {
-        return field != null ? field.trim() : "";
+        return field != null && !field.trim().isEmpty() ? field.trim() : "N/A";
     }
 }

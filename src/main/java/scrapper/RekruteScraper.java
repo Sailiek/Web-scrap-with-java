@@ -1,149 +1,220 @@
 package scrapper;
 
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import data.model.Offer;
 
 public class RekruteScraper implements WebScraper {
+    private static final int MAX_TRIES = 3;
+    private static final int SCRAPER_SLEEP_TIME = 2000; // Base sleep time in milliseconds
+    private static final int MAX_PAGES = 30;
 
+    private List<Offer> scrapeRekrute() {
+        List<Offer> offers = new ArrayList<>();
+        List<String> exceptions = new ArrayList<>();
 
-    private String scrapeJobDetails(String jobUrl) {
-        StringBuilder jobInfo = new StringBuilder();
+        for (int page = 1; page <= MAX_PAGES; page++) {
+            String url = "https://www.rekrute.com/fr/offres.html?s=3&p=" + page + "&o=1";
+            Document doc = null;
+            int retryCount = 0;
 
-        try {
-
-            Document jobDoc = Jsoup.connect(jobUrl).get();
-
-            // Scraping details from the individual job offer page
-            Element titleElement = jobDoc.select("h1").first();
-            jobInfo.append("Job Title: ").append((titleElement != null) ? titleElement.text() : "No title found").append("\n");
-
-            Element targetDiv = jobDoc.select("div.contentbloc").first();
-            Element introToSocieteElement = targetDiv.select("div#recruiterDescription p").first();
-            jobInfo.append("Company: ").append((introToSocieteElement != null) ? introToSocieteElement.text() : "No intro societe found").append("\n");
-
-
-//            Element descriptionPosteElement = targetDiv.select("div.col-md-12.blc ").eq(4).first();
-//            jobInfo.append("Description Offre: ").append((descriptionPosteElement != null) ? descriptionPosteElement.text() : "No description found").append("\n");
-
-//            Element SkillsPosteElement = targetDiv.select("div.col-md-12.blc").eq(5).first();
-//            jobInfo.append("Skills requis: ").append((SkillsPosteElement != null) ? SkillsPosteElement.text() : "No description found").append("\n");
-
-            Element exp_niveauEtudeDiv = jobDoc.select("ul.featureInfo").first();
-            Element nivEtdude = exp_niveauEtudeDiv.select("li").eq(2).first();
-            jobInfo.append("Study Level: ").append((nivEtdude !=null) ? nivEtdude.text():"not found").append("\n");
-
-            Element experience = exp_niveauEtudeDiv.select("li").eq(0).first();
-            jobInfo.append("Experience Level: ").append((experience !=null) ? experience.text():"not found").append("\n");
-
-            Element localisation = jobDoc.select("div.col-md-12.blc > span").eq(0).first();
-            jobInfo.append("Localisation: ")
-                    .append((localisation != null) ? localisation.text() : "not found")
-                    .append("\n");
-            List<String> jobDetails = new ArrayList<>();
-
-
-            Element typeContrat = jobDoc.select("ul.featureInfo > li > span.tagContrat").eq(0).first();
-            jobInfo.append("Contract Type: ").append((typeContrat != null) ? typeContrat.text() : "not found").append("\n");
-
-            jobInfo.append("URL :").append(jobUrl).append("\n");
-
-            Element fonctions = jobDoc.select("h2.h2italic").first();
-            if (fonctions != null) {
-                String mainText = fonctions.ownText(); // e.g., "Multimédia / Internet - Secteur Informatique"
-                mainText = mainText.replace("(métiers de la)", "").replace("(métiers de)", "").trim();
-                // Replace "/" with "," and remove "Secteur"
-                mainText = mainText.replace("/", ",").replace("Secteur", "").trim();
-
-                // Split the text by delimiters like "-" and ","
-                String[] parts = mainText.split("[-,]");
-
-                // Clean up each part and store in a list
-                List<String> result = new ArrayList<>();
-                for (String part : parts) {
-                    String cleanedPart = part.trim(); // Remove extra spaces
-                    if (!cleanedPart.isEmpty()) { // Ignore empty strings
-                        result.add(cleanedPart);
-                    }
-                }
-
-                // Print or return the final list
-                jobInfo.append("Job Details  :").append(result).append("\n");
-            } else {
-                System.out.println("<h2> element not found.");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Error scraping job details from: " + jobUrl;
-        }
-
-        return jobInfo.toString();
-    }
-
-    // Method to get all job links from the main page
-    private List<String> getJobLinksFromMainPage() {
-        List<String> jobLinks = new ArrayList<>();
-        int numPageToScrap = 1;
-
-        try {
-            for (int pageNumber = 1; pageNumber <= numPageToScrap; pageNumber++) {
-                String url = "https://www.rekrute.com/offres.html?s=1&p=" + pageNumber + "&o=1";
-                Document doc = Jsoup.connect(url).get();
-
-                // Adjusting selector to find the job links in <h2><a> tag
-                Element ulElement = doc.select("div.page > div#fortopscroll > div.main.alt-main > div.section > div.container > div.row > div.col-md-9 > div.content-column > div.slide-block > ul").first();
-
-                if (ulElement != null) {
-                    for (Element li : ulElement.select("li")) {
-                        // Look for the <h2><a> tag inside each <li> to extract the job link
-                        Element titleElement = li.select("h2 > a").first(); // <h2><a> tag for job link
-
-                        if (titleElement != null) {
-                            String jobUrl = titleElement.attr("href"); // Extract the href attribute (job link)
-
-                            // Ensure the URL is absolute
-                            if (!jobUrl.startsWith("http")) {
-                                jobUrl = "https://www.rekrute.com" + jobUrl;  // Make the URL absolute if it's relative
-                            }
-
-                            jobLinks.add(jobUrl); // Add the job URL to the list
-                        }
+            // Retry logic for connection failures
+            while (retryCount < MAX_TRIES) {
+                try {
+                    doc = Jsoup.connect(url).get();
+                    break;
+                } catch (Exception e) {
+                    System.out.println("Retrying connection to Rekrute page " + page);
+                    retryCount++;
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return offers;
                     }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            if (doc == null) {
+                continue;
+            }
+
+            Element postData = doc.getElementById("post-data");
+            if (postData == null) continue;
+
+            Elements allPosts = postData.getElementsByClass("post-id");
+            int postNum = 0;
+
+            for (Element post : allPosts) {
+                try {
+                    postNum++;
+                    Offer offer = extractOfferFromPost(post);
+                    if (offer != null) {
+                        offers.add(offer);
+                    }
+                } catch (Exception e) {
+                    String error = "Exception on post " + postNum + " page " + page + ": " + e.getMessage();
+                    exceptions.add(error);
+                    System.err.println(error);
+                }
+            }
+
+            // Sleep between pages with random delay
+            try {
+                Random random = new Random();
+                int randomDelay = random.nextInt(1000) + SCRAPER_SLEEP_TIME;
+                Thread.sleep(randomDelay);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
         }
 
-        return jobLinks;
+        // Print exception report
+        if (!exceptions.isEmpty()) {
+            System.err.println("\n*** EXCEPTION REPORT ***");
+            exceptions.forEach(System.err::println);
+            System.err.println("*********************");
+        }
+
+        return offers;
     }
 
+    private Offer extractOfferFromPost(Element post) throws Exception {
+        // Company info
+        Element companyDiv = post.getElementsByClass("col-sm-2 col-xs-12").first();
+        String nomEntreprise = companyDiv.getElementsByTag("img").attr("alt").trim();
+        String siteWebEntreprise = "https://www.rekrute.com" + companyDiv.getElementsByTag("a").first().attr("href");
 
-    // Method to scrape the details from all job links
+        // Job info
+        Element bodyDiv = post.getElementsByClass("col-sm-10 col-xs-12").first();
+        Element titleElement = bodyDiv.getElementsByClass("titreJob").first();
+        String rawTitle = titleElement.text().trim();
+        
+        // Parse title and location
+        String[] titleParts = rawTitle.split("\\|");
+        String titre = titleParts[0].trim();
+        String[] locationParts = titleParts[1].trim().split("\\(");
+        String ville = locationParts[0].trim();
+        String region = locationParts[1].replace(")", "").trim();
+
+        // Get URL
+        String url = "https://www.rekrute.com" + titleElement.attr("href");
+
+        // Company and job descriptions
+        String descriptionEntreprise = bodyDiv.getElementsByClass("info").get(0).text().trim();
+        String descriptionPoste = bodyDiv.getElementsByClass("info").get(1).text().trim();
+
+        // Dates
+        Element datesElement = bodyDiv.getElementsByClass("date").first();
+        String datePublicationStr = datesElement.getElementsByTag("span").get(0).text().trim();
+        String datePostulerStr = datesElement.getElementsByTag("span").get(1).text().trim();
+        
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Date datePublication = null;
+        Date datePostuler = null;
+        try {
+            datePublication = dateFormat.parse(datePublicationStr);
+            datePostuler = dateFormat.parse(datePostulerStr);
+        } catch (Exception e) {
+            System.err.println("Error parsing dates: " + e.getMessage());
+        }
+
+        // Job details
+        Element infoUl = bodyDiv.getElementsByClass("info").get(2).getElementsByTag("ul").first();
+        
+        String secteurActivite = extractTextFromElements(infoUl.getElementsByTag("li").get(0).getElementsByTag("a"));
+        String metier = extractTextFromElements(infoUl.getElementsByTag("li").get(1).getElementsByTag("a"));
+        String experience = extractTextFromElements(infoUl.getElementsByTag("li").get(2).getElementsByTag("a"));
+        String niveauEtudes = extractTextFromElements(infoUl.getElementsByTag("li").get(3).getElementsByTag("a"));
+        String typeContrat = infoUl.getElementsByTag("li").get(4).getElementsByTag("a").first().text().trim();
+        
+        // Telework status
+        String teletravailStr = infoUl.getElementsByTag("li").get(4).text().split(":")[2].trim();
+        boolean teletravail = teletravailStr.equalsIgnoreCase("Oui");
+
+        return new Offer(
+            0, // ID will be set by database
+            titre,
+            url,
+            "ReKrute",
+            datePublication,
+            datePostuler,
+            null, // adresseEntreprise
+            siteWebEntreprise,
+            nomEntreprise,
+            descriptionEntreprise,
+            descriptionPoste,
+            region,
+            ville,
+            secteurActivite,
+            metier,
+            typeContrat,
+            niveauEtudes,
+            null, // specialiteDiplome
+            experience,
+            null, // profilRecherche
+            null, // traitsPersonnalite
+            null, // competencesRequises
+            null, // softSkills
+            null, // competencesRecommandees
+            null, // langue
+            null, // niveauLangue
+            null, // salaire
+            null, // avantagesSociaux
+            teletravail
+        );
+    }
+
+    private String extractTextFromElements(Elements elements) {
+        StringBuilder text = new StringBuilder();
+        for (Element element : elements) {
+            if (text.length() > 0) text.append(" ");
+            text.append(element.text().trim());
+        }
+        return text.toString();
+    }
+
     @Override
     public List<String> getScrapedData() {
-        List<String> jobDataList = new ArrayList<>();
-
-        // Step 1: Get all job links from the main page
-        List<String> jobLinks = getJobLinksFromMainPage();
-
-        // Step 2: Visit each job link and scrape its details
-        for (String jobLink : jobLinks) {
-            String jobDetails = scrapeJobDetails(jobLink);
-            jobDataList.add(jobDetails);
+        List<String> result = new ArrayList<>();
+        List<Offer> offers = scrapeRekrute();
+        
+        for (Offer offer : offers) {
+            StringBuilder offerString = new StringBuilder();
+            offerString.append("Title: ").append(offer.getTitre()).append("\n");
+            offerString.append("Company: ").append(offer.getNomEntreprise()).append("\n");
+            offerString.append("Location: ").append(offer.getVille()).append(" (").append(offer.getRegion()).append(")\n");
+            offerString.append("Contract: ").append(offer.getTypeContrat()).append("\n");
+            offerString.append("Experience: ").append(offer.getExperience()).append("\n");
+            offerString.append("Education: ").append(offer.getNiveauEtudes()).append("\n");
+            offerString.append("Sector: ").append(offer.getSecteurActivite()).append("\n");
+            offerString.append("Function: ").append(offer.getMetier()).append("\n");
+            offerString.append("URL: ").append(offer.getUrl()).append("\n");
+            offerString.append("Remote Work: ").append(offer.isTeletravail() ? "Yes" : "No").append("\n");
+            offerString.append("Description: ").append(offer.getDescriptionPoste()).append("\n");
+            offerString.append("Company Description: ").append(offer.getDescriptionEntreprise()).append("\n");
+            
+            result.add(offerString.toString());
         }
-
-        return jobDataList;
+        
+        return result;
     }
 
     @Override
     public void scrap() {
-        // Print out the scraped job data to console
-        getScrapedData().forEach(System.out::println);
+        System.out.println("Starting Rekrute scraping...");
+        List<String> scrapedData = getScrapedData();
+        System.out.println("Scraped " + scrapedData.size() + " job offers from Rekrute");
+        scrapedData.forEach(System.out::println);
     }
 }

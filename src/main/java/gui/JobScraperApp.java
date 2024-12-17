@@ -1,6 +1,7 @@
 package gui;
 
 import data.model.Job;
+import data.model.Offer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -17,13 +18,14 @@ import java.util.List;
 public class JobScraperApp extends Application {
 
     private ListView<String> jobListView;
-    private List<String> scrapedJobData;
+    private List<Offer> scrapedJobData;
 
     @Override
     public void start(Stage primaryStage) {
         // Create components
         jobListView = new ListView<>();
         jobListView.setPrefWidth(600);
+        jobListView.setPrefHeight(300);
         jobListView.setMaxWidth(Double.MAX_VALUE);
         jobListView.setVisible(false); // Initially hidden
 
@@ -38,41 +40,73 @@ public class JobScraperApp extends Application {
         jobTitleInput.setPromptText("Enter job title (e.g., Product Manager)");
         TextArea predictionOutput = new TextArea();
         predictionOutput.setEditable(false);
-        predictionOutput.setPrefRowCount(3);
+        predictionOutput.setPrefRowCount(2);
         Button predictButton = new Button("Predict");
 
         // Scrap button action
-//        scrapButton.setOnAction(event -> {
-//            ScraperService scraperService = new ScraperService();
-//            scrapedJobData = scraperService.getAllJobData();
-//            showAlert("Success", "Scraping completed successfully!");
-//        });
+        scrapButton.setOnAction(event -> {
+            try {
+                ScraperService scraperService = new ScraperService();
+                scrapedJobData = scraperService.getAllJobData();
+                jobListView.setVisible(false);
+                showAlert("Success", "Scraping completed successfully! Found " + scrapedJobData.size() + " jobs.");
+            } catch (Exception e) {
+                showAlert("Error", "Error during scraping: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
 
         // Insert jobs button action
         insertJobsButton.setOnAction(event -> {
             if (scrapedJobData != null && !scrapedJobData.isEmpty()) {
-                JobInsertionService jobInsertionService = new JobInsertionService();
-                jobInsertionService.insertJobs(scrapedJobData);
-                showAlert("Success", "Jobs have been inserted into the database successfully!");
+                try {
+                    JobInsertionService jobInsertionService = new JobInsertionService();
+                    jobInsertionService.insertOffers(scrapedJobData);
+                    jobListView.setVisible(false);
+                    showAlert("Success", "Jobs have been inserted into the database successfully!");
+                } catch (Exception e) {
+                    showAlert("Error", "Error inserting jobs into database: " + e.getMessage());
+                    e.printStackTrace();
+                }
             } else {
                 showAlert("Error", "Please scrap the data first!");
             }
         });
 
         // View jobs button action
-//        viewJobsButton.setOnAction(event -> {
-//            JobRetrievalService jobRetrievalService = new JobRetrievalService();
-//            List<Job> jobsFromDb = jobRetrievalService.getAllJobs();
-//
-//            jobListView.getItems().clear();
-//            jobListView.setVisible(true);
-//
-//            for (Job job : jobsFromDb) {
-//                String jobDisplay = String.format("Title: %s, Company: %s, Experience: %s",
-//                        job.getTitle(), job.getCompany(), job.getExperience());
-//                jobListView.getItems().add(jobDisplay);
-//            }
-//        });
+        viewJobsButton.setOnAction(event -> {
+            try {
+                JobRetrievalService jobRetrievalService = new JobRetrievalService();
+                List<Offer> jobsFromDb = jobRetrievalService.getAllJobs();
+
+                jobListView.getItems().clear();
+                
+                for (Offer offer : jobsFromDb) {
+                    StringBuilder jobDisplay = new StringBuilder();
+                    jobDisplay.append(String.format("Title: %s\n", offer.getTitre()));
+                    jobDisplay.append(String.format("Company: %s\n", offer.getNomEntreprise()));
+                    jobDisplay.append(String.format("Location: %s, %s\n", offer.getVille(), offer.getRegion()));
+                    jobDisplay.append(String.format("Contract: %s\n", offer.getTypeContrat()));
+                    jobDisplay.append(String.format("Education: %s\n", offer.getNiveauEtudes()));
+                    jobDisplay.append(String.format("Experience: %s\n", offer.getExperience()));
+                    jobDisplay.append(String.format("Skills: %s\n", offer.getCompetencesRequises()));
+                    jobDisplay.append(String.format("Languages: %s (%s)\n", offer.getLangue(), offer.getNiveauLangue()));
+                    jobDisplay.append("----------------------------------------\n");
+                    
+                    jobListView.getItems().add(jobDisplay.toString());
+                }
+                
+                jobListView.setVisible(true);
+                if (jobsFromDb.isEmpty()) {
+                    showAlert("Info", "No jobs found in the database.");
+                } else {
+                    showAlert("Success", "Retrieved " + jobsFromDb.size() + " jobs from database.");
+                }
+            } catch (Exception e) {
+                showAlert("Error", "Error retrieving jobs from database: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
 
         // Predict button action
         predictButton.setOnAction(event -> {
@@ -105,11 +139,11 @@ public class JobScraperApp extends Application {
         VBox buttonsBox = new VBox(10, scrapButton, insertJobsButton, viewJobsButton);
         VBox predictionBox = new VBox(10, predictionLabel, jobTitleInput, predictButton, predictionOutput);
         
-        VBox root = new VBox(20);
+        VBox root = new VBox(15);
         root.setPadding(new Insets(10));
         root.getChildren().addAll(buttonsBox, jobListView, predictionBox);
 
-        Scene scene = new Scene(root, 600, 600);
+        Scene scene = new Scene(root, 650, 600);
         primaryStage.setResizable(true);
         primaryStage.setOnCloseRequest(event -> System.exit(0));
         primaryStage.setTitle("Job Scraper");

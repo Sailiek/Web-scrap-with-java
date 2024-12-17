@@ -8,12 +8,6 @@ import data.util.DatabaseConnectionManager;
 
 public class JobDAOImpl implements JobDAO {
 
-    private Connection connection;
-
-    public JobDAOImpl() {
-        this.connection = DatabaseConnectionManager.getConnection();
-    }
-
     @Override
     public void saveJob(Offer offer) {
         String query = "INSERT INTO jobs (titre, url, site_name, date_publication, date_postuler, " +
@@ -24,7 +18,8 @@ public class JobDAOImpl implements JobDAO {
                 "salaire, avantages_sociaux, teletravail) VALUES " +
                 "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnectionManager.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, offer.getTitre());
             stmt.setString(2, offer.getUrl());
             stmt.setString(3, offer.getSiteName());
@@ -59,6 +54,7 @@ public class JobDAOImpl implements JobDAO {
         } catch (SQLException e) {
             System.err.println("Error saving offer: " + e.getMessage());
             e.printStackTrace();
+            throw new RuntimeException("Failed to save job offer", e);
         }
     }
 
@@ -67,7 +63,8 @@ public class JobDAOImpl implements JobDAO {
         List<Offer> offers = new ArrayList<>();
         String query = "SELECT * FROM jobs";
 
-        try (Statement stmt = connection.createStatement(); 
+        try (Connection connection = DatabaseConnectionManager.getConnection();
+             Statement stmt = connection.createStatement(); 
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 try {
@@ -111,6 +108,7 @@ public class JobDAOImpl implements JobDAO {
         } catch (SQLException e) {
             System.err.println("Error retrieving offers: " + e.getMessage());
             e.printStackTrace();
+            throw new RuntimeException("Failed to retrieve job offers", e);
         }
         return offers;
     }
