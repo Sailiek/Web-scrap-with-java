@@ -14,7 +14,7 @@ public class ScraperService {
     public ScraperService() {
         scrapers = new ArrayList<>();
         scrapers.add(new RekruteScraper());
-        scrapers.add(new EmploiScraper());
+        //scrapers.add(new EmploiScraper());
 
 
     }

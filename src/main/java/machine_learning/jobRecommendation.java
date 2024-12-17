@@ -167,12 +167,12 @@ public class jobRecommendation {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        String filePath = "C:\\Users\\x1 carbon\\Downloads\\Web-scrap-with-java (1)\\Web-scrap-with-java\\final_inchaelh.csv"; // Replace with your CSV file path.
+        String filePath = "src/main/java/machine_learning/final_inchaelh.csv"; // Replace with your CSV file path.
         try {
             // Load jobs from CSV file.
             List<Job> jobList = readJobsFromCSV(filePath);
 
-            // Call the dummy Weka function to simulate Weka usage
+
             trainJobClassifier(jobList);
 
             System.out.println("Enter a keyword for the job title or details (leave blank to skip):");

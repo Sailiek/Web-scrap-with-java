@@ -20,7 +20,10 @@ module project.projetjava {
 
     requires weka.stable;
     requires java.base;
+
     requires org.apache.commons.csv;
+    requires org.apache.commons.text;
+    requires org.apache.commons.lang3;
 
     opens machine_learning;
     exports machine_learning;
@@ -29,5 +32,5 @@ module project.projetjava {
 
     // Export other packages
     opens project.projetjava to javafx.fxml;
-    
+
 }

@@ -1,74 +1,128 @@
 package gui;
 
-import java.util.List;
-
 import data.model.Job;
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import service.JobInsertionService;
 import service.JobRetrievalService;
 import service.ScraperService;
+import machine_learning.EnhancedJobPrediction;
+
+import java.util.List;
 
 public class JobScraperApp extends Application {
 
+    private ListView<String> jobListView;
+    private List<String> scrapedJobData;
+
     @Override
     public void start(Stage primaryStage) {
-        // Step 1: Create a ListView to display job information
-        ListView<String> jobListView = new ListView<>();
-        jobListView.setPrefWidth(600); // Set preferred width to ensure it starts with a width
-        jobListView.setMaxWidth(Double.MAX_VALUE); // Allow it to grow with the window
+        // Create components
+        jobListView = new ListView<>();
+        jobListView.setPrefWidth(600);
+        jobListView.setMaxWidth(Double.MAX_VALUE);
+        jobListView.setVisible(false); // Initially hidden
 
-        // Step 2: Initialize scraper and get scraped data
-        ScraperService scraperService = new ScraperService();
-        List<String> jobData = scraperService.getAllJobData();
-        jobListView.getItems().addAll(jobData);
+        // Create buttons
+        Button scrapButton = new Button("Scrap");
+        Button insertJobsButton = new Button("Insert to DB");
+        Button viewJobsButton = new Button("See from DB");
 
-        // Step 3: Create a Button to insert jobs into the database
-        Button insertJobsButton = new Button("Insert Jobs into Database");
-        insertJobsButton.setOnAction(event -> {
-            // When the button is clicked, insert the scraped data into the database
-            JobInsertionService jobInsertionService = new JobInsertionService();
-            jobInsertionService.insertJobs(jobData);
-            System.out.println("Jobs have been inserted into the database.");
+        // ML Prediction components
+        Label predictionLabel = new Label("Give our model a job title and it will predict the experience you need:");
+        TextField jobTitleInput = new TextField();
+        jobTitleInput.setPromptText("Enter job title (e.g., Product Manager)");
+        TextArea predictionOutput = new TextArea();
+        predictionOutput.setEditable(false);
+        predictionOutput.setPrefRowCount(3);
+        Button predictButton = new Button("Predict");
+
+        // Scrap button action
+        scrapButton.setOnAction(event -> {
+            ScraperService scraperService = new ScraperService();
+            scrapedJobData = scraperService.getAllJobData();
+            showAlert("Success", "Scraping completed successfully!");
         });
 
-        // Step 4: Create a Button to view jobs from the database
-        Button viewJobsButton = new Button("View Jobs from Database");
+        // Insert jobs button action
+        insertJobsButton.setOnAction(event -> {
+            if (scrapedJobData != null && !scrapedJobData.isEmpty()) {
+                JobInsertionService jobInsertionService = new JobInsertionService();
+                jobInsertionService.insertJobs(scrapedJobData);
+                showAlert("Success", "Jobs have been inserted into the database successfully!");
+            } else {
+                showAlert("Error", "Please scrap the data first!");
+            }
+        });
+
+        // View jobs button action
         viewJobsButton.setOnAction(event -> {
-            // Fetch job data from the database using JobRetrievalService
             JobRetrievalService jobRetrievalService = new JobRetrievalService();
             List<Job> jobsFromDb = jobRetrievalService.getAllJobs();
-
-            // Clear the ListView and add the fetched jobs
-            jobListView.getItems().clear(); // Clear the old items
+            
+            jobListView.getItems().clear();
+            jobListView.setVisible(true);
 
             for (Job job : jobsFromDb) {
-                // Format the job data (you can customize the display format as needed)
                 String jobDisplay = String.format("Title: %s, Company: %s, Experience: %s",
                         job.getTitle(), job.getCompany(), job.getExperience());
-                jobListView.getItems().add(jobDisplay); // Add each job to the ListView
+                jobListView.getItems().add(jobDisplay);
             }
-
-            System.out.println("Jobs from the database have been displayed.");
         });
 
-        // Step 5: Set up the layout and scene
-        VBox root = new VBox(10, jobListView, insertJobsButton, viewJobsButton); // Added another button
-        Scene scene = new Scene(root, 600, 400);
+        // Predict button action
+        predictButton.setOnAction(event -> {
+            String jobTitle = jobTitleInput.getText().trim();
+            if (!jobTitle.isEmpty()) {
+                try {
+                    Job predictedJob = EnhancedJobPrediction.predictJobDetails(jobTitle);
+                    if (predictedJob != null) {
+                        String prediction = String.format(
+                            "Closest job title: %s\n" +
+                            "Predicted Study Level: %s\n" +
+                            "Predicted Experience Level: %s",
+                            predictedJob.getTitle(),
+                            predictedJob.getEducationLevel(),
+                            predictedJob.getExperience()
+                        );
+                        predictionOutput.setText(prediction);
+                    } else {
+                        predictionOutput.setText("No matching job found.");
+                    }
+                } catch (Exception e) {
+                    showAlert("Error", "Error making prediction: " + e.getMessage());
+                }
+            } else {
+                showAlert("Error", "Please enter a job title!");
+            }
+        });
 
+        // Set up the layout
+        VBox buttonsBox = new VBox(10, scrapButton, insertJobsButton, viewJobsButton);
+        VBox predictionBox = new VBox(10, predictionLabel, jobTitleInput, predictButton, predictionOutput);
+        
+        VBox root = new VBox(20);
+        root.setPadding(new Insets(10));
+        root.getChildren().addAll(buttonsBox, jobListView, predictionBox);
+
+        Scene scene = new Scene(root, 600, 600);
         primaryStage.setResizable(true);
-
-        // Handle the window close event
         primaryStage.setOnCloseRequest(event -> System.exit(0));
-
-        // Set up the stage and show it
         primaryStage.setTitle("Job Scraper");
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     public static void main(String[] args) {
