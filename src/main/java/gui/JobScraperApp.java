@@ -42,11 +42,11 @@ public class JobScraperApp extends Application {
         Button predictButton = new Button("Predict");
 
         // Scrap button action
-        scrapButton.setOnAction(event -> {
-            ScraperService scraperService = new ScraperService();
-            scrapedJobData = scraperService.getAllJobData();
-            showAlert("Success", "Scraping completed successfully!");
-        });
+//        scrapButton.setOnAction(event -> {
+//            ScraperService scraperService = new ScraperService();
+//            scrapedJobData = scraperService.getAllJobData();
+//            showAlert("Success", "Scraping completed successfully!");
+//        });
 
         // Insert jobs button action
         insertJobsButton.setOnAction(event -> {
@@ -60,19 +60,19 @@ public class JobScraperApp extends Application {
         });
 
         // View jobs button action
-        viewJobsButton.setOnAction(event -> {
-            JobRetrievalService jobRetrievalService = new JobRetrievalService();
-            List<Job> jobsFromDb = jobRetrievalService.getAllJobs();
-            
-            jobListView.getItems().clear();
-            jobListView.setVisible(true);
-
-            for (Job job : jobsFromDb) {
-                String jobDisplay = String.format("Title: %s, Company: %s, Experience: %s",
-                        job.getTitle(), job.getCompany(), job.getExperience());
-                jobListView.getItems().add(jobDisplay);
-            }
-        });
+//        viewJobsButton.setOnAction(event -> {
+//            JobRetrievalService jobRetrievalService = new JobRetrievalService();
+//            List<Job> jobsFromDb = jobRetrievalService.getAllJobs();
+//
+//            jobListView.getItems().clear();
+//            jobListView.setVisible(true);
+//
+//            for (Job job : jobsFromDb) {
+//                String jobDisplay = String.format("Title: %s, Company: %s, Experience: %s",
+//                        job.getTitle(), job.getCompany(), job.getExperience());
+//                jobListView.getItems().add(jobDisplay);
+//            }
+//        });
 
         // Predict button action
         predictButton.setOnAction(event -> {

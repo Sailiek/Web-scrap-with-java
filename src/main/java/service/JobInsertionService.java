@@ -2,34 +2,77 @@ package service;
 
 import data.dao.JobDAO;
 import data.dao.JobDAOImpl;
-import data.model.Job;
+import data.model.Offer;
 
+import java.util.Date;
 import java.util.List;
 
 public class JobInsertionService {
+    private final JobDAO jobDAO;
 
+    public JobInsertionService() {
+        this.jobDAO = new JobDAOImpl();
+    }
+
+    public void insertOffer(Offer offer) {
+        try {
+            jobDAO.saveJob(offer);
+        } catch (Exception e) {
+            System.err.println("Error while inserting offer: " + offer.getTitre());
+            e.printStackTrace();
+        }
+    }
+
+    public void insertOffers(List<Offer> offers) {
+        for (Offer offer : offers) {
+            insertOffer(offer);
+        }
+    }
+
+    // Legacy method for backward compatibility
     public void insertJobs(List<String> jobData) {
-        JobDAOImpl jobDAOImpl = new JobDAOImpl(); // Instantiate DAO
-
         for (String job : jobData) {
             try {
                 String[] parsedData = parseScrapedData(job);
 
-                if (parsedData != null && parsedData.length >=8) {
-                    String title = parsedData[0];
-                    String company = parsedData[1];
-                    String education = parsedData[2];
-                    String experience = parsedData[3];
-                    String localisation = parsedData[4];
-                    String contract = parsedData[5];
-                    String link = parsedData[6];
-                    String jobDetails = parsedData[7];
+                if (parsedData != null && parsedData.length >= 8) {
+                    // Create Date objects for publication and application dates
+                    Date currentDate = new Date();
 
-                    // Create Job object
-                    Job newJob = new Job(title, company, "Description Placeholder", education, experience,localisation ,contract, link, jobDetails);
+                    // Create Offer object with all available fields
+                    Offer newOffer = new Offer(
+                        0, // id will be set by database
+                        parsedData[0], // title
+                        parsedData[6], // url
+                        "Unknown", // siteName
+                        currentDate, // datePublication
+                        currentDate, // datePostuler
+                        parsedData[4], // adresseEntreprise (using location)
+                        "", // siteWebEntreprise
+                        parsedData[1], // nomEntreprise
+                        "", // descriptionEntreprise
+                        parsedData[7], // descriptionPoste
+                        "", // region
+                        parsedData[4], // ville (using location)
+                        "", // secteurActivite
+                        "", // metier
+                        parsedData[5], // typeContrat
+                        parsedData[2], // niveauEtudes
+                        "", // specialiteDiplome
+                        parsedData[3], // experience
+                        "", // profilRecherche
+                        "", // traitsPersonnalite
+                        "", // competencesRequises
+                        "", // softSkills
+                        "", // competencesRecommandees
+                        "", // langue
+                        "", // niveauLangue
+                        "", // salaire
+                        "", // avantagesSociaux
+                        false // teletravail
+                    );
 
-                    // Save job to the database
-                    jobDAOImpl.saveJob(newJob);
+                    insertOffer(newOffer);
                 } else {
                     System.out.println("Skipping invalid job data: " + job);
                 }
@@ -40,12 +83,10 @@ public class JobInsertionService {
         }
     }
 
-
     private String[] parseScrapedData(String job) {
         try {
             String[] lines = job.split("\n");
 
-            // Check if we have at least 7 fields
             if (lines.length >= 8) {
                 String title = extractField(lines[0]);
                 String company = extractField(lines[1]);
@@ -56,20 +97,17 @@ public class JobInsertionService {
                 String link = extractField(lines[6]);
                 String jobDetails = extractField(lines[7]);
 
-                // Return the parsed data in an array
-                return new String[]{title, company, education, experience,localisation ,contract, link, jobDetails};
+                return new String[]{title, company, education, experience, localisation, contract, link, jobDetails};
             }
         } catch (Exception e) {
             System.err.println("Error while parsing job data: " + job);
             e.printStackTrace();
         }
 
-        return null; // Return null if the data is invalid
+        return null;
     }
 
-
     private String extractField(String field) {
-        // Remove unwanted whitespace or other characters
-        return field.replaceAll("[^\\w\\s]", "").trim();
+        return field != null ? field.trim() : "";
     }
 }
