@@ -20,11 +20,16 @@ public class JobDAOImpl implements JobDAO {
 
         try (Connection connection = DatabaseConnectionManager.getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, offer.getTitre());
+            
+            // Debug information
+            System.out.println("Attempting to save job offer with title: " + offer.getTitre());
+            
+            // Set values with null checks
+            stmt.setString(1, validateString(offer.getTitre(), "titre"));
             stmt.setString(2, offer.getUrl());
             stmt.setString(3, offer.getSiteName());
-            stmt.setDate(4, new java.sql.Date(offer.getDatePublication().getTime()));
-            stmt.setDate(5, new java.sql.Date(offer.getDatePostuler().getTime()));
+            stmt.setDate(4, offer.getDatePublication() != null ? new java.sql.Date(offer.getDatePublication().getTime()) : null);
+            stmt.setDate(5, offer.getDatePostuler() != null ? new java.sql.Date(offer.getDatePostuler().getTime()) : null);
             stmt.setString(6, offer.getAdresseEntreprise());
             stmt.setString(7, offer.getSiteWebEntreprise());
             stmt.setString(8, offer.getNomEntreprise());
@@ -49,13 +54,24 @@ public class JobDAOImpl implements JobDAO {
             stmt.setString(27, offer.getAvantagesSociaux());
             stmt.setBoolean(28, offer.isTeletravail());
             
-            stmt.executeUpdate();
-            System.out.println("Successfully saved offer: " + offer.getTitre());
+            // Execute the insert
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("Successfully saved offer: " + offer.getTitre() + " (Rows affected: " + rowsAffected + ")");
+            
         } catch (SQLException e) {
-            System.err.println("Error saving offer: " + e.getMessage());
+            String errorMessage = String.format("Error saving offer '%s': %s (SQL State: %s, Error Code: %d)", 
+                offer.getTitre(), e.getMessage(), e.getSQLState(), e.getErrorCode());
+            System.err.println(errorMessage);
             e.printStackTrace();
-            throw new RuntimeException("Failed to save job offer", e);
+            throw new RuntimeException(errorMessage, e);
         }
+    }
+
+    private String validateString(String value, String fieldName) throws SQLException {
+        if (value == null || value.trim().isEmpty()) {
+            throw new SQLException("Field '" + fieldName + "' cannot be null or empty");
+        }
+        return value;
     }
 
     @Override
@@ -66,6 +82,7 @@ public class JobDAOImpl implements JobDAO {
         try (Connection connection = DatabaseConnectionManager.getConnection();
              Statement stmt = connection.createStatement(); 
              ResultSet rs = stmt.executeQuery(query)) {
+            
             while (rs.next()) {
                 try {
                     Offer offer = new Offer(
