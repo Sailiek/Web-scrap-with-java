@@ -9,18 +9,19 @@ import java.util.List;
 import data.model.Offer;
 import scrapper.EmploiScraper;
 import scrapper.Mjob_Skuld_Operation;
+import scrapper.RekruteScraper;
 import scrapper.WebScraper;
  
 
 public class ScraperService {
 
-    private final List<WebScraper> scrapers;
+    public final List<WebScraper> scrapers;
 
     public ScraperService() {
         scrapers = new ArrayList<>();
-        //scrapers.add(new RekruteScraper());
-       // scrapers.add(new EmploiScraper());
-        scrapers.add(new Mjob_Skuld_Operation());
+        scrapers.add(new RekruteScraper());
+        //scrapers.add(new EmploiScraper());
+        //scrapers.add(new Mjob_Skuld_Operation());
     }
 
     public List<Offer> getAllJobData() {

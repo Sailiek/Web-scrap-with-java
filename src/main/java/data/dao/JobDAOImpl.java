@@ -8,6 +8,8 @@ import data.util.DatabaseConnectionManager;
 
 public class JobDAOImpl implements JobDAO {
 
+    private static final int TYPE_CONTRAT_MAX_LENGTH = 50;
+
     @Override
     public void saveJob(Offer offer) {
         String query = "INSERT INTO jobs (titre, url, site_name, date_publication, date_postuler, " +
@@ -39,7 +41,7 @@ public class JobDAOImpl implements JobDAO {
             stmt.setString(12, offer.getVille());
             stmt.setString(13, offer.getSecteurActivite());
             stmt.setString(14, offer.getMetier());
-            stmt.setString(15, offer.getTypeContrat());
+            stmt.setString(15, truncateString(offer.getTypeContrat(), TYPE_CONTRAT_MAX_LENGTH));
             stmt.setString(16, offer.getNiveauEtudes());
             stmt.setString(17, offer.getSpecialiteDiplome());
             stmt.setString(18, offer.getExperience());
@@ -72,6 +74,13 @@ public class JobDAOImpl implements JobDAO {
             throw new SQLException("Field '" + fieldName + "' cannot be null or empty");
         }
         return value;
+    }
+
+    private String truncateString(String value, int maxLength) {
+        if (value == null) {
+            return null;
+        }
+        return value.length() > maxLength ? value.substring(0, maxLength) : value;
     }
 
     @Override

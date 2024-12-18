@@ -12,7 +12,12 @@ public class JobRetrievalService {
     private final JobDAO jobDAO;
 
     public JobRetrievalService() {
-        this.jobDAO = new JobDAOImpl();
+        this.jobDAO = getJobDAO();
+    }
+
+    // Protected method to allow mocking in tests
+    protected JobDAO getJobDAO() {
+        return new JobDAOImpl();
     }
 
     public List<Offer> getAllJobs() {

@@ -12,7 +12,12 @@ public class JobInsertionService {
     private final JobDAO jobDAO;
 
     public JobInsertionService() {
-        this.jobDAO = new JobDAOImpl();
+        this.jobDAO = getJobDAO();
+    }
+
+    // Protected method to allow mocking in tests
+    protected JobDAO getJobDAO() {
+        return new JobDAOImpl();
     }
 
     public void insertOffer(Offer offer) {
