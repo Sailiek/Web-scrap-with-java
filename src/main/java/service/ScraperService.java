@@ -1,16 +1,16 @@
 package service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 import data.model.Offer;
 import scrapper.EmploiScraper;
-import scrapper.RekruteScraper;
+import scrapper.Mjob_Skuld_Operation;
 import scrapper.WebScraper;
+ 
 
 public class ScraperService {
 
@@ -18,8 +18,9 @@ public class ScraperService {
 
     public ScraperService() {
         scrapers = new ArrayList<>();
-        scrapers.add(new RekruteScraper());
-        //scrapers.add(new EmploiScraper());
+        //scrapers.add(new RekruteScraper());
+       // scrapers.add(new EmploiScraper());
+        scrapers.add(new Mjob_Skuld_Operation());
     }
 
     public List<Offer> getAllJobData() {

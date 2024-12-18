@@ -1,7 +1,9 @@
 package scrapper;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,187 +12,189 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import data.model.Offer;
+
 public class Mjob_Skuld_Operation implements WebScraper {
-
+    private static final int MAX_TRIES = 3;
+    private static final int SCRAPER_SLEEP_TIME = 2000;
+    
     private List<String> getthaturl(String url) {
-
         List<String> urllist = new ArrayList<>();
-        try{
-            Document doc = Jsoup.connect(url).get();
-            Elements links = doc.select("div.offer-box > div.right-area > div.date-buttons > form > div.form-group > a.btn.featured-btn");
+        int retryCount = 0;
+        
+        while (retryCount < MAX_TRIES) {
+            try {
+                Document doc = Jsoup.connect(url).get();
+                Elements links = doc.select("div.offer-box > div.right-area > div.date-buttons > form > div.form-group > a.btn.featured-btn");
 
-
-            for (Element link : links) {
-                String href = link.attr("href");
-                if (!href.isEmpty()) {
-                    urllist.add(href);
+                for (Element link : links) {
+                    String href = link.attr("href");
+                    if (!href.isEmpty()) {
+                        urllist.add(href);
+                    }
+                }
+                break;
+            } catch (Exception e) {
+                System.out.println("Retrying connection to M-job page");
+                retryCount++;
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return urllist;
                 }
             }
-            return urllist;
         }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-
         return urllist;
     }
 
-
     private String nextoneplease(String url, int previous_page) {
-        StringBuilder nexturl = new StringBuilder();
-        nexturl.append(url).append("?page=").append(previous_page+1);
-        return nexturl.toString();
+        return url + "?page=" + (previous_page + 1);
     }
 
-
-    private String datascraped(String url) {
-
-
-        StringBuilder data = new StringBuilder();
-
-        try{
-
+    private Offer extractOfferFromUrl(String url) {
+        try {
             Document doc = Jsoup.connect(url).get();
 
-            Element element = doc.select("div.container > div.details-content > div.header-details > div.header-info").first();
-            Element sec = doc.select("div.container > div.details-content > div.the-content").first();
+            Element headerElement = doc.select("div.container > div.details-content > div.header-details > div.header-info").first();
+            Element contentElement = doc.select("div.container > div.details-content > div.the-content").first();
 
-
-            if (sec != null && element != null) {
-                try{
-
-                    Element title = element.select("h1.offer-title").first();
-                    data.append("Job Title: ").append(title.text()).append("\n");
-
-                }catch(Exception e){
-                    data.append("-Titre:element not found!!").append("\n");
-                }
-
-
-
-                try{
-
-                    Element Company = element.select("ul.list-details > li:nth-child(1) > h3").first();
-                    data.append("Company: ").append(Company.text()).append("\n");
-
-                }catch(Exception e){
-                    data.append("-Company:element not found!!").append("\n");
-                }
-
-                
-
-                String Exp = "(?<=\\bNiveau d'expériences requis :)(.*?)(?=\\bNiveau d'études exigé :)";
-                String Std = "(?<=Niveau d'études exigé :)(.*?)(?=\\bLangue\\(s\\) exigée\\(s\\) :)";
-
-
-
-                Pattern pattern = Pattern.compile(Exp);
-                Matcher matcher = pattern.matcher(sec.text());
-
-                Pattern patternS = Pattern.compile(Std);
-                Matcher matcherS = patternS.matcher(sec.text());
-
-                // Find and print the match
-                
-
-                if (matcherS.find()) {
-                    data.append("Study Level: ").append(matcherS.group(1).trim()).append("\n");
-                }else{
-                    data.append("-Niveau d'experience :element not found!!").append("\n");
-                }
-                
-                if (matcher.find()) {
-                    data.append("Experience Level: ").append(matcher.group()).append("\n");
-                }
-                else{
-                    data.append("-Niveau d'experience :element not found!!").append("\n");
-                }
-
-                try{
-
-                    Element location = element.select("div.location > span").first();
-                    data.append("Localisation: ").append(location.text()).append("\n");
-
-                }catch(Exception e){
-                    data.append("-Localisation:element not found!!").append("\n");
-                }
-
-
-                try{
-
-                    Element contract = element.select("ul.list-details > li:nth-child(2) > h3").first();
-                    data.append("Contract Type: ").append(contract.text()).append("\n");
-
-                }catch(Exception e){
-                    data.append("-Contrat:element not found!!").append("\n");
-                }
-
-
-                //try{
-
-                    //Element experience = sec.select("div:nth-child(14) ").first();
-                    //data.append("-Niveau expérience:").append(experience.text()).append("\n");
-
-                //}catch(Exception e){
-                    //data.append("-Niveau expérience:element not found!!").append("\n");
-                //}
-
-
-
-               
-
-
-                //try{
-
-                    //Element studylvl = sec.select("div:nth-child(15) ").first();
-                    //data.append("-Niveau d'étude:").append(studylvl.text()).append("\n");
-
-                //}catch(Exception e){
-                    //data.append("-Niveau d'étude:element not found!!").append("\n");
-                //}
-
-                data.append("URL : ").append(url).append("\n");
+            if (headerElement == null || contentElement == null) {
+                return null;
             }
 
+            // Extract basic information
+            String titre = extractElementText(headerElement, "h1.offer-title");
+            String nomEntreprise = extractElementText(headerElement, "ul.list-details > li:nth-child(1) > h3");
+            String location = extractElementText(headerElement, "div.location > span");
+            String typeContrat = extractElementText(headerElement, "ul.list-details > li:nth-child(2) > h3");
 
-            return data.toString();
+            // Split location into ville and region if possible
+            String ville = location;
+            String region = "";
+            if (location.contains(",")) {
+                String[] locationParts = location.split(",");
+                ville = locationParts[0].trim();
+                region = locationParts[1].trim();
+            }
+
+            // Extract experience and education using regex
+            String contentText = contentElement.text();
+            String experience = extractWithRegex(contentText, "(?<=\\bNiveau d'expériences requis :)(.*?)(?=\\bNiveau d'études exigé :)");
+            String niveauEtudes = extractWithRegex(contentText, "(?<=Niveau d'études exigé :)(.*?)(?=\\bLangue\\(s\\) exigée\\(s\\) :)");
+
+            // Create new Offer object
+            return new Offer(
+                0, // ID will be set by database
+                titre,
+                url,
+                "M-job",
+                new Date(), // Current date as publication date
+                null, // datePostuler
+                null, // adresseEntreprise
+                null, // siteWebEntreprise
+                nomEntreprise,
+                null, // descriptionEntreprise
+                contentText, // Using full content as description
+                region,
+                ville,
+                null, // secteurActivite
+                null, // metier
+                typeContrat,
+                niveauEtudes,
+                null, // specialiteDiplome
+                experience,
+                null, // profilRecherche
+                null, // traitsPersonnalite
+                null, // competencesRequises
+                null, // softSkills
+                null, // competencesRecommandees
+                null, // langue
+                null, // niveauLangue
+                null, // salaire
+                null, // avantagesSociaux
+                false // teletravail - default to false as not specified
+            );
 
         } catch (Exception e) {
-            return "an error occurred while trying to get that offer";
+            System.err.println("Error extracting offer from URL " + url + ": " + e.getMessage());
+            return null;
         }
     }
 
+    private String extractElementText(Element parent, String selector) {
+        Element element = parent.select(selector).first();
+        return element != null ? element.text().trim() : "";
+    }
 
-    @Override
-    public List<String> getScrapedData(){
-        List<String> data = new ArrayList<>();
-        String element="";
-        List<String> urllist = new ArrayList<>();
-        String M_job = "https://www.m-job.ma/recherche";
+    private String extractWithRegex(String text, String regex) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(text);
+        return matcher.find() ? matcher.group(1).trim() : "";
+    }
 
-        int nombreDePage =1;
-        int i =0;
-        while (i<nombreDePage){
+    public List<Offer> scrapeOffers() {
+        List<Offer> offers = new ArrayList<>();
+        String baseUrl = "https://www.m-job.ma/recherche";
+        int numberOfPages = 1;  // Can be modified to scrape more pages
 
-            urllist = getthaturl(M_job);
-            for (String url : urllist) {
-                element = datascraped(url);
-                data.add(element);
+        for (int i = 0; i < numberOfPages; i++) {
+            List<String> urlList = getthaturl(baseUrl);
+            
+            for (String url : urlList) {
+                Offer offer = extractOfferFromUrl(url);
+                if (offer != null) {
+                    offers.add(offer);
+                }
             }
 
-            M_job = nextoneplease(M_job, i);
+            // Add random delay between pages
+            try {
+                Random random = new Random();
+                int randomDelay = random.nextInt(1000) + SCRAPER_SLEEP_TIME;
+                Thread.sleep(randomDelay);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
 
-            i++;
+            baseUrl = nextoneplease(baseUrl, i);
         }
 
-        return data;
-
+        return offers;
     }
 
+    @Override
+    public List<String> getScrapedData() {
+        List<String> result = new ArrayList<>();
+        List<Offer> offers = scrapeOffers();
+        
+        for (Offer offer : offers) {
+            StringBuilder offerString = new StringBuilder();
+            offerString.append("Title: ").append(offer.getTitre()).append("\n");
+            offerString.append("Company: ").append(offer.getNomEntreprise()).append("\n");
+            offerString.append("Location: ").append(offer.getVille());
+            if (!offer.getRegion().isEmpty()) {
+                offerString.append(" (").append(offer.getRegion()).append(")");
+            }
+            offerString.append("\n");
+            offerString.append("Contract: ").append(offer.getTypeContrat()).append("\n");
+            offerString.append("Experience: ").append(offer.getExperience()).append("\n");
+            offerString.append("Education: ").append(offer.getNiveauEtudes()).append("\n");
+            offerString.append("URL: ").append(offer.getUrl()).append("\n");
+            offerString.append("Description: ").append(offer.getDescriptionPoste()).append("\n");
+            
+            result.add(offerString.toString());
+        }
+        
+        return result;
+    }
 
     @Override
     public void scrap() {
-        // Print out the scraped job data to console
-        getScrapedData().forEach(System.out::println);
+        System.out.println("Starting M-job scraping...");
+        List<String> scrapedData = getScrapedData();
+        System.out.println("Scraped " + scrapedData.size() + " job offers from M-job");
+        scrapedData.forEach(System.out::println);
     }
 }
