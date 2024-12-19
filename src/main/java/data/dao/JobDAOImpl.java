@@ -138,4 +138,22 @@ public class JobDAOImpl implements JobDAO {
         }
         return offers;
     }
+
+    @Override
+    public void emptyDatabase() {
+        String query = "TRUNCATE TABLE jobs";
+        try (Connection connection = DatabaseConnectionManager.getConnection();
+             Statement stmt = connection.createStatement()) {
+            
+            System.out.println("Attempting to empty the jobs table...");
+            stmt.executeUpdate(query);
+            System.out.println("Successfully emptied the jobs table");
+            
+        } catch (SQLException e) {
+            String errorMessage = "Error emptying database: " + e.getMessage();
+            System.err.println(errorMessage);
+            e.printStackTrace();
+            throw new RuntimeException(errorMessage, e);
+        }
+    }
 }

@@ -5,37 +5,73 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 import data.model.Offer;
 import scrapper.EmploiScraper;
 import scrapper.Mjob_Skuld_Operation;
 import scrapper.RekruteScraper;
 import scrapper.WebScraper;
- 
 
 public class ScraperService {
-
     public final List<WebScraper> scrapers;
 
     public ScraperService() {
         scrapers = new ArrayList<>();
         scrapers.add(new RekruteScraper());
-        //scrapers.add(new EmploiScraper());
-        //scrapers.add(new Mjob_Skuld_Operation());
+        scrapers.add(new EmploiScraper());
+        scrapers.add(new Mjob_Skuld_Operation());
     }
 
     public List<Offer> getAllJobData() {
-        List<Offer> allJobData = new ArrayList<>();
+        // Create a thread pool with a number of threads equal to the number of scrapers
+        ExecutorService executorService = Executors.newFixedThreadPool(scrapers.size());
+        
+        // Create a list to hold the Future objects
+        List<Future<List<Offer>>> futures = new ArrayList<>();
+
+        // Submit each scraper as a separate task
         for (WebScraper scraper : scrapers) {
+            Future<List<Offer>> future = executorService.submit(() -> {
+                try {
+                    List<String> scrapedData = scraper.getScrapedData();
+                    return convertToOffers(scrapedData, scraper.getClass().getSimpleName());
+                } catch (Exception e) {
+                    System.err.println("Error scraping data from " + scraper.getClass().getSimpleName() + ": " + e.getMessage());
+                    e.printStackTrace();
+                    return new ArrayList<>();
+                }
+            });
+            futures.add(future);
+        }
+
+        // Collect all results
+        List<Offer> allJobData = new ArrayList<>();
+        for (Future<List<Offer>> future : futures) {
             try {
-                List<String> scrapedData = scraper.getScrapedData();
-                List<Offer> offers = convertToOffers(scrapedData, scraper.getClass().getSimpleName());
+                // Wait up to 2 minutes for each scraper to complete
+                List<Offer> offers = future.get(2, TimeUnit.MINUTES);
                 allJobData.addAll(offers);
+            } catch (TimeoutException e) {
+                System.err.println("A scraper timed out: " + e.getMessage());
             } catch (Exception e) {
-                System.err.println("Error scraping data from " + scraper.getClass().getSimpleName() + ": " + e.getMessage());
-                e.printStackTrace();
+                System.err.println("Error collecting scraping results: " + e.getMessage());
             }
         }
+
+        // Shutdown the executor service
+        executorService.shutdown();
+        try {
+            // Wait up to 5 minutes for all tasks to complete
+            if (!executorService.awaitTermination(5, TimeUnit.MINUTES)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+
         return allJobData;
     }
 

@@ -16,7 +16,7 @@ import data.model.Offer;
 public class RekruteScraper implements WebScraper {
     private static final int MAX_TRIES = 3;
     private static final int SCRAPER_SLEEP_TIME = 2000; // Base sleep time in milliseconds
-    private static final int MAX_PAGES = 1;
+    private static final int MAX_PAGES = 30;
 
     private List<Offer> scrapeRekrute() {
         List<Offer> offers = new ArrayList<>();

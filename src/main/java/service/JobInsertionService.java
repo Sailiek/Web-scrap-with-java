@@ -49,6 +49,17 @@ public class JobInsertionService {
         }
     }
 
+    public void emptyDatabase() {
+        try {
+            jobDAO.emptyDatabase();
+        } catch (Exception e) {
+            String errorMessage = "Error while emptying database";
+            System.err.println(errorMessage);
+            e.printStackTrace();
+            throw new RuntimeException(errorMessage, e);
+        }
+    }
+
     // Legacy method for backward compatibility
     public void insertJobs(List<String> jobData) {
         if (jobData == null || jobData.isEmpty()) {
