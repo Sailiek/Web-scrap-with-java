@@ -15,8 +15,17 @@ module project.projetjava {
     requires org.jsoup;
     requires java.sql;
 
-    // Open the gui package to javafx.graphics
+    // Open the gui packages to javafx.graphics
     opens gui to javafx.graphics;
+    opens gui.components to javafx.graphics;
+    opens gui.components.charts to javafx.graphics;
+    opens gui.utils to javafx.graphics;
+    
+    // Export gui packages
+    exports gui;
+    exports gui.components;
+    exports gui.components.charts;
+    exports gui.utils;
 
     requires weka.stable;
     requires java.base;

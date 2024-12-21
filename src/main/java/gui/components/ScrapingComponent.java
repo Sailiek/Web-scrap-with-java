@@ -24,8 +24,15 @@ public class ScrapingComponent extends Tab {
         
         VBox content = new VBox();
         content.setSpacing(10);
+        content.setAlignment(javafx.geometry.Pos.CENTER);
+        content.setPadding(new javafx.geometry.Insets(20));
         
         scrapButton = new Button("Scrap");
+        scrapButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;");
+        scrapButton.setMinWidth(150);
+        scrapButton.setOnMouseEntered(e -> scrapButton.setStyle("-fx-background-color: #45a049; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;"));
+        scrapButton.setOnMouseExited(e -> scrapButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;"));
+        
         setupScrapButton();
         content.getChildren().add(scrapButton);
         

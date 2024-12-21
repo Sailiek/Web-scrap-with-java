@@ -25,8 +25,26 @@ public class JobStatistics {
                 Collectors.counting()
             ));
 
-        // Create pie chart
+        // Create pie chart with proper layout and size constraints
         PieChart chart = new PieChart();
+        chart.setLabelsVisible(true);
+        chart.setLabelLineLength(20);
+        chart.setStartAngle(90);
+        chart.setClockwise(false);
+        
+        // Set size constraints to ensure the chart scales properly
+        chart.setMinSize(800, 600);
+        chart.setPrefSize(1000, 800);
+        chart.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        
+        // Ensure the chart uses available space and is visible
+        chart.setScaleShape(true);
+        chart.setPickOnBounds(true);
+        chart.setAnimated(false); // Disable animations to ensure immediate rendering
+        chart.setLegendVisible(true);
+        chart.setVisible(true);
+        chart.setManaged(true);
+        
         sectorCounts.forEach((sector, count) -> {
             if (sector != null && !sector.isEmpty()) {
                 PieChart.Data data = new PieChart.Data(sector, count);
@@ -55,8 +73,26 @@ public class JobStatistics {
                 Collectors.counting()
             ));
 
-        // Create pie chart
+        // Create pie chart with proper layout and size constraints
         PieChart chart = new PieChart();
+        chart.setLabelsVisible(true);
+        chart.setLabelLineLength(20);
+        chart.setStartAngle(90);
+        chart.setClockwise(false);
+        
+        // Set size constraints to ensure the chart scales properly
+        chart.setMinSize(800, 600);
+        chart.setPrefSize(1000, 800);
+        chart.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        
+        // Ensure the chart uses available space and is visible
+        chart.setScaleShape(true);
+        chart.setPickOnBounds(true);
+        chart.setAnimated(false); // Disable animations to ensure immediate rendering
+        chart.setLegendVisible(true);
+        chart.setVisible(true);
+        chart.setManaged(true);
+        
         contractCounts.forEach((type, count) -> {
             PieChart.Data data = new PieChart.Data(type, count);
             chart.getData().add(data);
@@ -81,9 +117,22 @@ public class JobStatistics {
         xAxis.setLabel("City");
         yAxis.setLabel("Number of Jobs");
 
-        // Create chart
+        // Create chart with proper layout and size constraints
         BarChart<String, Number> chart = new BarChart<>(xAxis, yAxis);
         chart.setTitle("Job Distribution by City");
+        
+        // Set size constraints to ensure the chart scales properly
+        chart.setMinSize(800, 600);
+        chart.setPrefSize(1000, 800);
+        chart.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        
+        // Ensure the chart uses available space and is visible
+        chart.setScaleShape(true);
+        chart.setPickOnBounds(true);
+        chart.setAnimated(false); // Disable animations to ensure immediate rendering
+        chart.setLegendVisible(true);
+        chart.setVisible(true);
+        chart.setManaged(true);
 
         // Group by city and count
         Map<String, Long> cityCounts = offers.stream()
@@ -123,8 +172,22 @@ public class JobStatistics {
         xAxis.setLabel("Education Level");
         yAxis.setLabel("Number of Jobs");
 
+        // Create chart with proper layout and size constraints
         BarChart<String, Number> chart = new BarChart<>(xAxis, yAxis);
         chart.setTitle("Job Distribution by Education Level");
+        
+        // Set size constraints to ensure the chart scales properly
+        chart.setMinSize(800, 600);
+        chart.setPrefSize(1000, 800);
+        chart.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        
+        // Ensure the chart uses available space and is visible
+        chart.setScaleShape(true);
+        chart.setPickOnBounds(true);
+        chart.setAnimated(false); // Disable animations to ensure immediate rendering
+        chart.setLegendVisible(true);
+        chart.setVisible(true);
+        chart.setManaged(true);
 
         // Normalize education levels before grouping
         Map<String, Long> educationCounts = offers.stream()
@@ -158,27 +221,71 @@ public class JobStatistics {
      * Normalizes education level strings to handle variations
      */
     private static String normalizeEducationLevel(String level) {
-        if (level == null || level.isEmpty()) return "";
+        if (level == null || level.isEmpty()) return "Non spécifié";
         
-        // Convert to uppercase for case-insensitive comparison
-        String normalized = level.toUpperCase().trim();
+        // Print original value for debugging
+        System.out.println("Original education level: " + level);
         
-        // Handle BAC+ variations
-        if (normalized.contains("BAC+") || normalized.contains("BAC +")) {
-            normalized = normalized.replaceAll("\\s+", ""); // Remove spaces
-            normalized = normalized.replace("BAC+", "BAC+"); // Standardize format
+        // Convert to uppercase for case-insensitive comparison and normalize accents
+        String normalized = level.toUpperCase()
+            .trim()
+            .replace('É', 'E')
+            .replace('È', 'E')
+            .replace('Ê', 'E')
+            .replace('À', 'A')
+            .replace('Â', 'A')
+            .replace('Î', 'I')
+            .replace('Ô', 'O')
+            .replace('Û', 'U');
+        
+        // Handle BAC+ variations with any number
+        if (normalized.matches(".*BAC\\s*\\+\\s*\\d.*")) {
+            normalized = normalized.replaceAll("\\s+", ""); // Remove all spaces
+            normalized = normalized.replaceAll("BAC\\s*\\+\\s*(\\d+).*", "BAC+$1"); // Standardize BAC+ format
         }
         
         // Handle specific cases
-        return switch (normalized) {
-            case "BAC+2", "BAC +2", "BAC+ 2", "BTS", "DUT", "DEUG" -> "BAC+2";
-            case "BAC+3", "BAC +3", "BAC+ 3", "LICENCE", "LICENSE" -> "BAC+3";
-            case "BAC+4", "BAC +4", "BAC+ 4", "MAITRISE" -> "BAC+4";
-            case "BAC+5", "BAC +5", "BAC+ 5", "MASTER", "INGENIEUR" -> "BAC+5";
-            case "BAC+8", "BAC +8", "BAC+ 8", "DOCTORAT", "PHD" -> "BAC+8";
-            case "BAC", "BACCALAUREAT" -> "BAC";
-            default -> normalized;
+        String result = switch (normalized) {
+            // BAC+2 variations
+            case "BAC+2", "BTS", "DUT", "DEUG", "TECHNICIEN SPECIALISE", "DIPLOME TECHNICIEN SPECIALISE",
+                 "TECHNICIEN SUPERIEUR", "DIPLOME DE TECHNICIEN SUPERIEUR", "DTS", "DEUST" -> "BAC+2";
+            
+            // BAC+3 variations
+            case "BAC+3", "LICENCE", "LICENSE", "BACHELOR", "DIPLOME DE LICENCE",
+                 "LICENCE PROFESSIONNELLE", "LICENCE PRO" -> "BAC+3";
+            
+            // BAC+4 variations
+            case "BAC+4", "MAITRISE", "MASTER 1", "M1", "DIPLOME DE MAITRISE" -> "BAC+4";
+            
+            // BAC+5 variations
+            case "BAC+5", "MASTER", "MASTER 2", "M2", "INGENIEUR", "INGENIEUR D'ETAT",
+                 "DIPLOME D'INGENIEUR", "DIPLOME D'INGENIEUR D'ETAT", "DIPLOME DE MASTER",
+                 "MASTER SPECIALISE", "MBA" -> "BAC+5";
+            
+            // BAC+8 variations
+            case "BAC+8", "DOCTORAT", "PHD", "DOCTEUR", "DOCTORATE", "THESE DE DOCTORAT" -> "BAC+8";
+            
+            // BAC variations
+            case "BAC", "BACCALAUREAT", "NIVEAU BAC" -> "BAC";
+            
+            // Professional formation variations
+            case "FORMATION PROFESSIONNELLE", "FORMATION", "QUALIFICATION",
+                 "FORMATION QUALIFIANTE", "DIPLOME DE FORMATION PROFESSIONNELLE" -> "Formation Professionnelle";
+            
+            default -> {
+                // If it contains BAC+ with a number, use that standardized format
+                if (normalized.matches(".*BAC\\+\\d.*")) {
+                    yield normalized.replaceAll(".*?(BAC\\+\\d).*", "$1");
+                }
+                // Otherwise categorize as Other and log for debugging
+                System.out.println("Unmatched education level: " + normalized);
+                yield "Autre";
+            }
         };
+        
+        // Print normalized value for debugging
+        System.out.println("Normalized education level: " + result);
+        return result;
     }
 
     /**

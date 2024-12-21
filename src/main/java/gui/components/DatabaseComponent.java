@@ -31,17 +31,25 @@ public class DatabaseComponent extends Tab {
         this.statisticsComponent = statisticsComponent;
         
         VBox content = new VBox();
-        content.setSpacing(10);
+        content.setSpacing(20);
         
         // Initialize JobListComponent
         this.jobListComponent = new JobListComponent();
         
-        insertJobsButton = new Button("Insert to DB");
-        viewJobsButton = new Button("See from DB");
-        emptyDatabaseButton = new Button("Empty Database");
+        // Create a VBox for buttons
+        VBox buttonBox = new VBox();
+        buttonBox.setSpacing(10);
+        buttonBox.setAlignment(javafx.geometry.Pos.CENTER);
+        buttonBox.setPadding(new javafx.geometry.Insets(20));
+        
+        // Initialize and style buttons
+        insertJobsButton = createStyledButton("Insert to DB", "#4CAF50");
+        viewJobsButton = createStyledButton("See from DB", "#2196F3");
+        emptyDatabaseButton = createStyledButton("Empty Database", "#f44336");
         
         setupButtons();
-        content.getChildren().addAll(insertJobsButton, viewJobsButton, emptyDatabaseButton, jobListComponent);
+        buttonBox.getChildren().addAll(insertJobsButton, viewJobsButton, emptyDatabaseButton);
+        content.getChildren().addAll(buttonBox, jobListComponent);
         
         setContent(content); // Set the VBox as the tab's content
     }
@@ -98,6 +106,24 @@ public class DatabaseComponent extends Tab {
                 }
             }
         });
+    }
+
+    private Button createStyledButton(String text, String baseColor) {
+        Button button = new Button(text);
+        button.setStyle(String.format("-fx-background-color: %s; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;", baseColor));
+        button.setMinWidth(150);
+        
+        // Calculate a slightly darker color for hover effect (reduce brightness by 10%)
+        String hoverColor = baseColor.replace("#", "#dd");
+        
+        button.setOnMouseEntered(e -> 
+            button.setStyle(String.format("-fx-background-color: %s; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;", hoverColor))
+        );
+        button.setOnMouseExited(e -> 
+            button.setStyle(String.format("-fx-background-color: %s; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;", baseColor))
+        );
+        
+        return button;
     }
 
     private void refreshJobView() {

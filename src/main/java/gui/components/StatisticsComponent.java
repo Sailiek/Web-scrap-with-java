@@ -2,14 +2,13 @@ package gui.components;
 
 import data.model.Offer;
 import javafx.geometry.Insets;
-import javafx.scene.chart.Chart;
+import gui.components.charts.*;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import machine_learning.JobStatistics;
 import service.JobRetrievalService;
 
 import java.util.List;
@@ -21,9 +20,22 @@ public class StatisticsComponent extends Tab {
     private VBox chartContainer;
     private ComboBox<String> chartSelector;
     private Label totalJobsLabel;
+    
+    // Chart components
+    private SectorDistributionChart sectorChart;
+    private CityDistributionChart cityChart;
+    private EducationDistributionChart educationChart;
+    private ContractTypeDistributionChart contractTypeChart;
 
     public StatisticsComponent(JobRetrievalService jobRetrievalService) {
         this.jobRetrievalService = jobRetrievalService;
+        
+        // Initialize chart components
+        sectorChart = new SectorDistributionChart();
+        cityChart = new CityDistributionChart();
+        educationChart = new EducationDistributionChart();
+        contractTypeChart = new ContractTypeDistributionChart();
+        
         setText("Statistics");
         setContent(createContent());
         loadInitialData();
@@ -32,6 +44,8 @@ public class StatisticsComponent extends Tab {
     private ScrollPane createContent() {
         VBox content = new VBox(20);
         content.setPadding(new Insets(20));
+        content.setFillWidth(true);
+        VBox.setVgrow(content, Priority.ALWAYS);
 
         // Create total jobs label
         totalJobsLabel = new Label();
@@ -46,8 +60,10 @@ public class StatisticsComponent extends Tab {
         );
         chartSelector.setPromptText("Select a chart to display");
         
-        // Create chart container
+        // Create chart container that scales with window
         chartContainer = new VBox();
+        chartContainer.setFillWidth(true);
+        chartContainer.setAlignment(javafx.geometry.Pos.CENTER);
         VBox.setVgrow(chartContainer, Priority.ALWAYS);
         
         // Add selection handler
@@ -63,6 +79,15 @@ public class StatisticsComponent extends Tab {
 
         ScrollPane scrollPane = new ScrollPane(content);
         scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setPannable(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        
+        // Make ScrollPane fully responsive
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        scrollPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        
         return scrollPane;
     }
 
@@ -92,27 +117,48 @@ public class StatisticsComponent extends Tab {
     }
 
     private void updateChart(String selectedChart) {
-        if (offers == null || selectedChart == null) return;
+        if (offers == null || selectedChart == null) {
+            System.out.println("Cannot update chart: offers=" + (offers != null ? offers.size() : "null") + ", selectedChart=" + selectedChart);
+            return;
+        }
         
-        chartContainer.getChildren().clear();
-        
-        Chart chart = switch (selectedChart) {
-            case "Distribution of Jobs by Sector" -> 
-                JobStatistics.createSectorDistributionChart(offers);
-            case "Job Distribution by City" -> 
-                JobStatistics.createCityDistributionChart(offers);
-            case "Job Distribution by Education Level" -> 
-                JobStatistics.createEducationDistributionChart(offers);
-            case "Distribution of Jobs by Contract Type" ->
-                JobStatistics.createContractTypeDistributionChart(offers);
-            default -> null;
-        };
-        
-        if (chart != null) {
-            // Set preferred size for better visibility
-            chart.setPrefWidth(800);
-            chart.setPrefHeight(600);
-            chartContainer.getChildren().add(chart);
+        try {
+            // Ensure UI updates happen on JavaFX Application Thread
+            javafx.application.Platform.runLater(() -> {
+                try {
+                    chartContainer.getChildren().clear();
+                    
+                    System.out.println("Updating chart: " + selectedChart + " with " + offers.size() + " offers");
+                    
+                    switch (selectedChart) {
+                        case "Distribution of Jobs by Sector" -> {
+                            sectorChart.updateChart(offers);
+                            chartContainer.getChildren().add(sectorChart);
+                        }
+                        case "Job Distribution by City" -> {
+                            cityChart.updateChart(offers);
+                            chartContainer.getChildren().add(cityChart);
+                        }
+                        case "Job Distribution by Education Level" -> {
+                            educationChart.updateChart(offers);
+                            chartContainer.getChildren().add(educationChart);
+                        }
+                        case "Distribution of Jobs by Contract Type" -> {
+                            contractTypeChart.updateChart(offers);
+                            chartContainer.getChildren().add(contractTypeChart);
+                        }
+                    }
+                    
+                    // Force layout update
+                    chartContainer.requestLayout();
+                } catch (Exception e) {
+                    System.err.println("Error updating chart: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("Error in updateChart: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
