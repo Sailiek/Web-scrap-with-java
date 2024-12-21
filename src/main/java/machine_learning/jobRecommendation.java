@@ -31,6 +31,16 @@ public final class jobRecommendation {
         boolean isCDI;
         boolean isCDD;
 
+        public void setJobTitle(String jobTitle) {
+            this.jobTitle = jobTitle;
+        }
+
+        public Job() {
+        }
+
+        public void setCompany(String company) {
+            this.company = company;
+        }
 
         public Job(String jobTitle, String company, String studyLevel, double encodedStudyLevel,
                    double encodedExperienceLevel, String location, String contractType, List<String> jobDetails,

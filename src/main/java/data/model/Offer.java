@@ -73,6 +73,9 @@ public class Offer {
         this.teletravail = teletravail;
     }
 
+    public Offer() {
+    }
+
     public int getId() {
         return id;
     }
