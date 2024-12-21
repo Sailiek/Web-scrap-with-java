@@ -16,9 +16,9 @@ import java.io.Reader;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class jobRecommendation {
+public final class jobRecommendation {
 
-    static class Job {
+    public static  class Job {
         String jobTitle;
         String company;
         String studyLevel;
@@ -30,6 +30,7 @@ public class jobRecommendation {
         String url;
         boolean isCDI;
         boolean isCDD;
+
 
         public Job(String jobTitle, String company, String studyLevel, double encodedStudyLevel,
                    double encodedExperienceLevel, String location, String contractType, List<String> jobDetails,

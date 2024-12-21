@@ -25,12 +25,13 @@ module project.projetjava {
     requires org.apache.commons.text;
     requires org.apache.commons.lang3;
 
+    // Add Jackson and iText dependencies
+    requires com.fasterxml.jackson.databind;
+    requires itextpdf;
+
+
+    // Export packages
     opens machine_learning;
     exports machine_learning;
-
-
-
-    // Export other packages
     opens project.projetjava to javafx.fxml;
-
 }

@@ -31,14 +31,14 @@ public class JobScraperApp extends Application {
             scrapingComponent,
             statisticsComponent
         );
-        PredictionComponent predictionComponent = new PredictionComponent(jobRetrievalService);
+        MachineLearningComponent machineLearningComponent = new MachineLearningComponent(jobRetrievalService);
         
         // Add tabs
         tabPane.getTabs().addAll(
             homeComponent,
             scrapingComponent,
             databaseComponent,
-            predictionComponent,
+            machineLearningComponent,
             statisticsComponent
         );
 
