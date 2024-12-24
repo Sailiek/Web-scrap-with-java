@@ -170,7 +170,7 @@ public class EnhancedJobPrediction {
             
             Job predictedJob = predictJobDetails(jobTitle);
             if (predictedJob != null) {
-                System.out.println("Closest job title: " + predictedJob.getTitle());
+                //System.out.println("Closest job title: " + predictedJob.getTitle());
                 System.out.println("Predicted Study Level: " + predictedJob.getEducationLevel());
                 System.out.println("Predicted Experience Level: " + predictedJob.getExperience());
             } else {
