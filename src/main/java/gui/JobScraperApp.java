@@ -8,6 +8,9 @@ import service.JobInsertionService;
 import service.JobRetrievalService;
 import service.ScraperService;
 import service.AuthenticateUserService;
+import service.UserManagementService;
+import data.util.DatabaseConnectionManager;
+import data.model.User;
 
 public class JobScraperApp extends Application {
     private Stage primaryStage;
@@ -15,6 +18,7 @@ public class JobScraperApp extends Application {
     private JobInsertionService jobInsertionService;
     private JobRetrievalService jobRetrievalService;
     private ScraperService scraperService;
+    private UserManagementService userManagementService;
 
     @Override
     public void start(Stage stage) {
@@ -28,15 +32,17 @@ public class JobScraperApp extends Application {
         this.jobInsertionService = new JobInsertionService();
         this.jobRetrievalService = new JobRetrievalService();
         this.scraperService = new ScraperService();
+        this.userManagementService = new UserManagementService();
+        // Initialize the new service
     }
 
     private void showLoginForm() {
         LoginComponent loginComponent = new LoginComponent(
-            primaryStage, 
-            authService, 
-            this::showMainInterface
+                primaryStage,
+                authService,
+                this::showMainInterface
         );
-        
+
         Scene scene = new Scene(loginComponent, 300, 250);
         primaryStage.setTitle("Login - Job Scraper Application");
         primaryStage.setScene(scene);
@@ -44,16 +50,22 @@ public class JobScraperApp extends Application {
     }
 
     private void showMainInterface() {
+        User user = new User();
         MainComponent mainComponent = new MainComponent(
-            jobInsertionService,
-            jobRetrievalService,
-            scraperService
+                primaryStage,               // Pass the primaryStage
+                jobInsertionService,        // Pass the jobInsertionService
+                jobRetrievalService,        // Pass the jobRetrievalService
+                scraperService,             // Pass the scraperService
+                userManagementService,      // Pass the userManagementService
+                authService,                // Pass the authService
+                "sar"                       // Pass the currentUsername
         );
 
         Scene scene = new Scene(mainComponent, 600, 600);
         primaryStage.setTitle("Job Scraper Application");
         primaryStage.setScene(scene);
     }
+
 
     public static void main(String[] args) {
         launch();
