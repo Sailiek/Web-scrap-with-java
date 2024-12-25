@@ -17,6 +17,7 @@ public class JobInsertionService {
 
     // Protected method to allow mocking in tests
     protected JobDAO getJobDAO() {
+
         return new JobDAOImpl();
     }
 

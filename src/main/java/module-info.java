@@ -43,4 +43,6 @@ module project.projetjava {
     opens machine_learning;
     exports machine_learning;
     opens project.projetjava to javafx.fxml;
+    exports gui.AdminDashboardComponents;
+    opens gui.AdminDashboardComponents to javafx.graphics;
 }
