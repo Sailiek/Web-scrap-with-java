@@ -169,7 +169,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public void deleteUser(String username) {
+    public  void deleteUser(String username) {
         String query = "DELETE FROM users WHERE username = ?";
 
         try (Connection connection = DatabaseConnectionManager.getConnection();
