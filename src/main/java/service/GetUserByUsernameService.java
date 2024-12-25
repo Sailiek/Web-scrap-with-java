@@ -40,7 +40,11 @@ public class GetUserByUsernameService {
         VBox vbox = new VBox(10);
 
         // Displaying user information (adjust based on available fields)
-        Label usernameLabel = new Label("Username: " + user.getUsername());
+        Label usernameLabel = new Label("Username: " + user.getUsername()
+        +"\n Name :"+user.getNom()
+        +"\n Prenom :"+user.getPrenom()
+        +"\n Field :"+user.getFieldOfWork()
+        +"\n Age : "+user.getAge());
         // If your User class doesn't have getEmail(), use other available fields:
         // For example, displaying just the username:
         vbox.getChildren().add(usernameLabel);
