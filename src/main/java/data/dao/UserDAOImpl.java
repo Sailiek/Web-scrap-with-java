@@ -133,25 +133,26 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public void updateUser(User user) {
-        String query = "UPDATE users SET nom = ?, prenom = ?, userEmail = ?, userPassword = ?, " +
+    public void updateUser(User user, String user_name) {
+        String query = "UPDATE users SET username = ?, nom = ?, prenom = ?, userEmail = ?, userPassword = ?, " +
                 "fieldOfWork = ?, age = ?, userType = ?, monthOfBirth = ?, dayOfBirth = ?, " +
                 "yearOfBirth = ? WHERE username = ?";
 
         try (Connection connection = DatabaseConnectionManager.getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {
 
-            stmt.setString(1, validateString(user.getNom(), "nom"));
-            stmt.setString(2, validateString(user.getPrenom(), "prenom"));
-            stmt.setString(3, user.getUserEmail());
-            stmt.setString(4, validateString(user.getUserPassword(), "password"));
-            stmt.setString(5, user.getFieldOfWork());
-            stmt.setInt(6, user.getAge());
-            stmt.setString(7, user.getUserType().toString());
-            stmt.setInt(8, user.getMonthOfBirth());
-            stmt.setInt(9, user.getDayOfBirth());
-            stmt.setInt(10, user.getYearOfBirth());
-            stmt.setString(11, validateString(user.getUsername(), "username"));
+            stmt.setString(1, validateString(user.getUsername(), "username"));
+            stmt.setString(2, validateString(user.getNom(), "nom"));
+            stmt.setString(3, validateString(user.getPrenom(), "prenom"));
+            stmt.setString(4, user.getUserEmail());
+            stmt.setString(5, validateString(user.getUserPassword(), "password"));
+            stmt.setString(6, user.getFieldOfWork());
+            stmt.setInt(7, user.getAge());
+            stmt.setString(8, user.getUserType().toString());
+            stmt.setInt(9, user.getMonthOfBirth());
+            stmt.setInt(10, user.getDayOfBirth());
+            stmt.setInt(11, user.getYearOfBirth());
+            stmt.setString(12, validateString(user_name, "username"));
 
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected == 0) {

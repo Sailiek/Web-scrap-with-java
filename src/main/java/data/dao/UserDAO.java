@@ -10,7 +10,7 @@ public interface UserDAO {
     User getUserByEmail(String email);
     List<User> getAllUsers();
     List<User> getUsersByType(UserTypes userType);
-    void updateUser(User user);
+    void updateUser(User user, String user_name);
     void deleteUser(String username);
     boolean authenticateUser(String username, String password);
 }
