@@ -13,7 +13,11 @@ import service.SaveUserService;
 import data.model.UserTypes;
 import gui.utils.AlertUtils;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class LoginComponent extends VBox {
     private final Stage primaryStage;
@@ -65,6 +69,8 @@ public class LoginComponent extends VBox {
         User user = authService.authenticateUser(username, password);
         if (user != null) {
             UserTypes userType = user.getUserType();
+            logUserLogin(username, userType); // Log the successful login
+
             if (userType == UserTypes.ADMIN || userType == UserTypes.SUPERADMIN) {
                 new AdminDashboard(primaryStage);
             } else if (userType == UserTypes.CLIENT || userType == UserTypes.GUEST) {
@@ -74,6 +80,19 @@ public class LoginComponent extends VBox {
             }
         } else {
             AlertUtils.showError("Error", "Invalid credentials");
+        }
+    }
+
+    private void logUserLogin(String username, UserTypes userType) {
+        String logFilePath = "logfile.txt"; // Specify the log file path
+        LocalDateTime now = LocalDateTime.now(); // Get the current date and time
+        String timestamp = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")); // Format the date and time
+        String logEntry = String.format("%s - User: %s, Type: %s%n", timestamp, username, userType);
+
+        try (FileWriter writer = new FileWriter(logFilePath, true)) { // Open the file in append mode
+            writer.write(logEntry);
+        } catch (IOException e) {
+            System.err.println("Error writing to log file: " + e.getMessage());
         }
     }
 
@@ -97,13 +116,11 @@ public class LoginComponent extends VBox {
         Spinner<Integer> daySpinner = new Spinner<>(1, 31, 1);
         Spinner<Integer> yearSpinner = new Spinner<>(1900, 2024, 2000); // Default year is 2000
 
-        // The ComboBox is removed, and userType is always set to CLIENT
         UserTypes userType = UserTypes.CLIENT; // Set user type to CLIENT directly
 
         // Create register button
         Button registerButton = new Button("Register");
         registerButton.setOnAction(e -> {
-            // Get the values from the form fields
             String nom = nomField.getText();
             String prenom = prenomField.getText();
             String userEmail = emailField.getText();
@@ -128,11 +145,9 @@ public class LoginComponent extends VBox {
             alert.setContentText("User registered successfully!");
             alert.showAndWait();
 
-            // Close the registration form after successful registration
-            registrationStage.close();
+            registrationStage.close(); // Close the registration form after successful registration
         });
 
-        // Add form fields to the registration form
         registrationForm.getChildren().addAll(
                 new Label("Nom:"), nomField,
                 new Label("Prenom:"), prenomField,
@@ -146,12 +161,10 @@ public class LoginComponent extends VBox {
                 registerButton
         );
 
-        // Wrap the registration form inside a ScrollPane for scrolling
         ScrollPane scrollPane = new ScrollPane(registrationForm);
-        scrollPane.setFitToHeight(true); // Enable scrolling to the height of the content
-        scrollPane.setFitToWidth(true);  // Enable scrolling to the width of the content
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
 
-        // Set up the scene for the registration form
         Scene registrationScene = new Scene(scrollPane, 400, 600);
         registrationStage.setScene(registrationScene);
         registrationStage.show();
@@ -161,8 +174,6 @@ public class LoginComponent extends VBox {
         LocalDate currentDate = LocalDate.now();
         LocalDate birthDate = LocalDate.of(birthYear, birthMonth, birthDay);
 
-        // Calculate the age by subtracting the birth year from the current year,
-        // and adjusting if the birthday has not yet occurred this year.
         int age = currentDate.getYear() - birthDate.getYear();
 
         if (currentDate.getMonthValue() < birthDate.getMonthValue() ||
@@ -172,7 +183,4 @@ public class LoginComponent extends VBox {
 
         return age;
     }
-
-
-
 }

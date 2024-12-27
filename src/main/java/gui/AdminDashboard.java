@@ -32,7 +32,7 @@ public class AdminDashboard {
         TabPane tabPane = new TabPane();
 
         // Add the OperationsTab
-        OperationsTabComponent operationsTab = new OperationsTabComponent();
+        OperationsTabComponent operationsTab = new OperationsTabComponent(stage); // Use 'stage' here
         tabPane.getTabs().add(operationsTab);
 
         // Add the StatisticsTab
