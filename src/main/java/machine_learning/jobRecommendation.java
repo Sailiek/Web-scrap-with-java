@@ -157,21 +157,96 @@ public final class jobRecommendation {
 
             // Convert jobList to Weka Instances format
             for (Job job : jobList) {
-                // Create an instance with the same number of attributes
-                Instance instance = new DenseInstance(3);  // 3 attributes
+                Instance instance = new DenseInstance(3); // 3 attributes
                 instance.setValue((Attribute) attributes.elementAt(0), job.encodedStudyLevel);
                 instance.setValue((Attribute) attributes.elementAt(1), job.encodedExperienceLevel);
-                instance.setValue((Attribute) attributes.elementAt(2), job.contractType.equals("CDI") ? 1 : 0); // Just a mock feature conversion
+                instance.setValue((Attribute) attributes.elementAt(2), job.contractType.equals("CDI") ? 1 : 0);
                 data.add(instance);
             }
 
-            // Apply Weka's J48 decision tree classifier (just for demonstration)
+            // Normalize data (standardizing numeric attributes)
+            normalizeData(data);
+
+            // Apply Weka's J48 decision tree classifier
             J48 j48 = new J48();
             j48.buildClassifier(data);
             System.out.println("Weka J48 Model trained successfully.");
 
+            // Save the model to disk (for future use in predictions)
+            weka.core.SerializationHelper.write("jobRecommendationModel.model", j48);
+
+            // Evaluate model performance using cross-validation
+            evaluateModel(data, j48);
+
         } catch (Exception e) {
             System.out.println("Error with Weka: " + e.getMessage());
+        }
+    }
+
+    private static void normalizeData(Instances data) {
+        for (int i = 0; i < data.numAttributes(); i++) {
+            if (data.attribute(i).isNumeric()) {
+                double min = data.attributeStats(i).numericStats.min;
+                double max = data.attributeStats(i).numericStats.max;
+                for (int j = 0; j < data.numInstances(); j++) {
+                    Instance instance = data.instance(j);
+                    double normalizedValue = (instance.value(i) - min) / (max - min);
+                    instance.setValue(i, normalizedValue);
+                }
+            }
+        }
+    }
+
+    private static void evaluateModel(Instances data, J48 j48) {
+        try {
+            // Perform 10-fold cross-validation for evaluation
+            weka.classifiers.Evaluation evaluation = new weka.classifiers.Evaluation(data);
+            evaluation.crossValidateModel(j48, data, 10, new Random(1));
+
+            System.out.println("\nModel Evaluation Results:");
+            System.out.println("Correctly Classified Instances: " + evaluation.pctCorrect() + "%");
+            System.out.println("Incorrectly Classified Instances: " + evaluation.pctIncorrect() + "%");
+            System.out.println("Precision: " + evaluation.precision(0));
+            System.out.println("Recall: " + evaluation.recall(0));
+            System.out.println("F-Measure: " + evaluation.fMeasure(0));
+
+        } catch (Exception e) {
+            System.out.println("Error evaluating model: " + e.getMessage());
+        }
+    }
+
+
+    public static void predictJobClassification(Job jobToClassify) {
+        try {
+            // Load the trained model from disk
+            J48 j48 = (J48) weka.core.SerializationHelper.read("jobRecommendationModel.model");
+
+            // Prepare the instance to classify
+            FastVector attributes = new FastVector();
+            attributes.addElement(new Attribute("Study Level"));
+            attributes.addElement(new Attribute("Experience Level"));
+            attributes.addElement(new Attribute("Contract Type"));
+
+            Instances data = new Instances("JobData", attributes, 1);
+            data.setClassIndex(0);
+
+            Instance instance = new DenseInstance(3); // 3 attributes
+            instance.setValue((Attribute) attributes.elementAt(0), jobToClassify.encodedStudyLevel);
+            instance.setValue((Attribute) attributes.elementAt(1), jobToClassify.encodedExperienceLevel);
+            instance.setValue((Attribute) attributes.elementAt(2), jobToClassify.contractType.equals("CDI") ? 1 : 0);
+            data.add(instance);
+
+            // Normalize the instance before prediction (using same method as in training)
+            normalizeData(data);
+
+            // Perform prediction
+            double predictedClass = j48.classifyInstance(data.instance(0));
+
+            // Output the prediction
+            System.out.println("Predicted Class: " + (predictedClass == 1 ? "CDI" : "Not CDI"));
+
+        } catch (Exception e) {
+            System.out.println("Error making prediction: " + e.getMessage());
         }
     }
 
@@ -183,42 +258,23 @@ public final class jobRecommendation {
             // Load jobs from CSV file.
             List<Job> jobList = readJobsFromCSV(filePath);
 
-
+            // Train the classifier and save the model
             trainJobClassifier(jobList);
 
-            System.out.println("Enter a keyword for the job title or details (leave blank to skip):");
-            String keyword = scanner.nextLine();
+            // Ask user for a target job and make predictions
+            System.out.println("Enter the job title to classify (or press enter to skip):");
+            String targetJobTitle = scanner.nextLine();
+            Job targetJob = jobList.stream()
+                    .filter(job -> job.jobTitle.equalsIgnoreCase(targetJobTitle))
+                    .findFirst()
+                    .orElse(null);
 
-            System.out.println("Enter the maximum years of experience (leave blank to skip):");
-            String experienceInput = scanner.nextLine();
-            Double maxExperience = experienceInput.isBlank() ? null : Double.parseDouble(experienceInput);
-
-            System.out.println("Enter the location (leave blank to skip):");
-            String location = scanner.nextLine();
-
-            System.out.println("Enter the contract type (e.g., 'CDI', 'CDD'; leave blank to skip):");
-            String contractType = scanner.nextLine();
-
-            // Filter jobs based on user input.
-            List<Job> filteredJobs = filterJobs(jobList, keyword, maxExperience, location, contractType);
-
-            // Output all matching jobs containing the keyword
-            if (filteredJobs.isEmpty()) {
-                System.out.println("No jobs found matching your criteria.");
+            if (targetJob != null) {
+                // Make prediction for the selected job
+                predictJobClassification(targetJob);
             } else {
-                System.out.println("\nJobs matching your criteria:");
-                filteredJobs.forEach(System.out::println);  // Print all matching jobs
+                System.out.println("Job not found in the list.");
             }
-
-            // Choose a target job (for example, the first filtered job).
-            Job targetJob = filteredJobs.get(0);
-
-            // Get top 5 recommendations from the filtered list.
-            List<Job> recommendations = recommendJobs(targetJob, filteredJobs, 5);
-
-            // Print recommendations.
-            System.out.println("\nTop Job Recommendations:");
-            recommendations.forEach(System.out::println);
 
         } catch (IOException e) {
             System.out.println("Error reading the CSV file: " + e.getMessage());
@@ -227,4 +283,5 @@ public final class jobRecommendation {
             System.out.println("Invalid input for experience. Please enter a numeric value.");
         }
     }
+
 }
