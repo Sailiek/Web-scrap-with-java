@@ -57,7 +57,7 @@ public class LoginComponent extends VBox {
 
 
         if (nochance == 0){
-            Button Guest = new Button("Continue as a Geust");
+            Button Guest = new Button("Continue as a Guest");
 
             Guest.setOnAction(event -> {
                 welcomeguest();
