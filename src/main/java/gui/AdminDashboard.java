@@ -1,5 +1,8 @@
 package gui;
 
+import data.dao.UserDAOImpl;
+import data.model.User;
+import gui.AdminDashboardComponents.LogFileTabComponent;
 import gui.AdminDashboardComponents.OperationsTabComponent;
 import gui.AdminDashboardComponents.StatisticsTabComponent;
 import javafx.geometry.Pos;
@@ -9,7 +12,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import service.AdminStatisticsService;
-import data.dao.UserDAOImpl;
+import service.GetUserService;
+import service.ReceiveCurrentUsername;
 
 public class AdminDashboard {
     private Stage stage;
@@ -32,7 +36,9 @@ public class AdminDashboard {
         TabPane tabPane = new TabPane();
 
         // Add the OperationsTab
-        OperationsTabComponent operationsTab = new OperationsTabComponent(stage); // Use 'stage' here
+        String currentusername = ReceiveCurrentUsername.currentUsername;
+        User user = GetUserService.getUserByUsername(currentusername);
+        OperationsTabComponent operationsTab = new OperationsTabComponent(stage, user);
         tabPane.getTabs().add(operationsTab);
 
         // Add the StatisticsTab
@@ -40,6 +46,10 @@ public class AdminDashboard {
         AdminStatisticsService statisticsService = new AdminStatisticsService(userDAO); // Service instance
         StatisticsTabComponent statisticsTab = new StatisticsTabComponent(statisticsService);
         tabPane.getTabs().add(statisticsTab);
+
+        // Add the Log File Tab
+        LogFileTabComponent logFileTab = new LogFileTabComponent();
+        tabPane.getTabs().add(logFileTab);
 
         // Add components to the root layout
         root.getChildren().addAll(titleLabel, tabPane);
@@ -50,3 +60,4 @@ public class AdminDashboard {
         stage.setScene(scene);
     }
 }
+

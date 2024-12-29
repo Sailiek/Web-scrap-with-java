@@ -12,10 +12,27 @@ import data.model.UserTypes;
 import data.model.UserValidator;
 import data.model.RegexExceptions.*;
 import service.GetUserService;
+import service.ReceiveCurrentUsername;
+import service.SaveUserService;
 import service.UpdateUserService;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import data.model.RegexExceptions.RegexValidationException;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+
+
+
+
 
 public class UpdateUser extends Button {
 
@@ -29,6 +46,7 @@ public class UpdateUser extends Button {
         super("Update User");
         this.setStyle("-fx-font-size: 14px; -fx-padding: 10px 20px;");
         this.setOnAction(event -> showUsernameInputPopup());
+
     }
 
 
@@ -75,77 +93,185 @@ public class UpdateUser extends Button {
         Stage popupStage = new Stage();
         popupStage.setTitle("Update User");
 
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(10));
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
-
         // Create input fields with validation
-        TextField usernameField = createInputField("Username:", gridPane, 0, user.getUsername());
+        //TextField usernameField = createInputField("Username:", gridPane, 0, user.getUsername());
 
-        TextField nomField = createInputField("Nom:", gridPane, 1, user.getNom());
-
-
-        TextField prenomField = createInputField("Prenom:", gridPane, 2, user.getPrenom());
+        //TextField nomField = createInputField("Nom:", gridPane, 1, user.getNom());
 
 
-        TextField emailField = createInputField("Email:", gridPane, 3, user.getUserEmail());
+        //TextField prenomField = createInputField("Prenom:", gridPane, 2, user.getPrenom());
 
 
-        TextField passwordField = createInputField("Password:", gridPane, 4, user.getUserPassword());
+        //TextField emailField = createInputField("Email:", gridPane, 3, user.getUserEmail());
 
 
-        TextField fieldOfWorkField = createInputField("Field of Work:", gridPane, 5, user.getFieldOfWork());
+        //TextField passwordField = createInputField("Password:", gridPane, 4, user.getUserPassword());
 
 
-        TextField ageField = createInputField("Age:", gridPane, 6, String.valueOf(user.getAge()));
+        //TextField fieldOfWorkField = createInputField("Field of Work:", gridPane, 5, user.getFieldOfWork());
 
 
-        TextField userTypeField = createInputField("User Type:", gridPane, 7, user.getUserType().toString());
+        //TextField ageField = createInputField("Age:", gridPane, 6, String.valueOf(user.getAge()));
+
+
+        //TextField userTypeField = createInputField("User Type:", gridPane, 7, user.getUserType().toString());
 
 
         // Create date fields with validation
-        TextField dayField = createInputField("Day of Birth (1-31):", gridPane, 8, String.valueOf(user.getDayOfBirth()));
+        //TextField dayField = createInputField("Day of Birth (1-31):", gridPane, 8, String.valueOf(user.getDayOfBirth()));
 
 
-        TextField monthField = createInputField("Month of Birth (1-12):", gridPane, 9, String.valueOf(user.getMonthOfBirth()));
+        //TextField monthField = createInputField("Month of Birth (1-12):", gridPane, 9, String.valueOf(user.getMonthOfBirth()));
 
 
-        TextField yearField = createInputField("Year of Birth (1900-2023):", gridPane, 10, String.valueOf(user.getYearOfBirth()));
+        //TextField yearField = createInputField("Year of Birth (1900-2023):", gridPane, 10, String.valueOf(user.getYearOfBirth()));
+
+
+
+
+        Label newUsernameLabel = new Label("Username:");
+        TextField newUsernameField = new TextField(user.getUsername());
+        newUsernameField.setDisable(false);
+        newUsernameField.setEditable(true);
+
+        Label emailLabel = new Label("Email:");
+        TextField emailField = new TextField(user.getUserEmail());
+        emailField.setDisable(false);
+        emailField.setEditable(true);
+
+        Label passwordLabel = new Label("Password:");
+        TextField passwordField = new TextField(user.getUserPassword());
+        passwordField.setDisable(false);
+        passwordField.setEditable(true);
+
+
+        Label nomLabel = new Label("Nom:");
+        TextField nomField = new TextField(user.getNom());
+        newUsernameField.setDisable(false);
+        newUsernameField.setEditable(true);
+
+        Label prenomLabel = new Label("Prenom:");
+        TextField prenomField = new TextField(user.getPrenom());
+        emailField.setDisable(false);
+        emailField.setEditable(true);
+
+        Label fieldOfWorkLabel = new Label("field of work :");
+        TextField fieldOfWorkField = new TextField(user.getFieldOfWork());
+        passwordField.setDisable(false);
+        passwordField.setEditable(true);
+
+
+        Label ageLabel = new Label("Age:");
+        TextField ageField = new TextField(String.valueOf(user.getAge()));
+        newUsernameField.setDisable(false);
+        newUsernameField.setEditable(true);
+
+        Label userTypeLabel = new Label("Email:");
+        TextField userTypeField = new TextField(String.valueOf(user.getUserType()));
+        emailField.setDisable(false);
+        emailField.setEditable(true);
+
+        Label dayLabel = new Label("Day of birth:");
+        TextField dayField = new TextField(String.valueOf(user.getDayOfBirth()));
+        passwordField.setDisable(false);
+        passwordField.setEditable(true);
+
+
+        Label monthLabel = new Label("Month of birth:");
+        TextField monthField = new TextField(String.valueOf(user.getMonthOfBirth()));
+        emailField.setDisable(false);
+        emailField.setEditable(true);
+
+        Label yearLabel = new Label("Year of birth:");
+        TextField yearField = new TextField(String.valueOf(user.getYearOfBirth()));
+        passwordField.setDisable(false);
+        passwordField.setEditable(true);
+
+
 
 
 
 
         updateButton = new Button("Update");
-        // Ensure text fields are editable
+
+
+
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(10));
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+
+
+
+        gridPane.add(newUsernameLabel, 0, 0);
+        gridPane.add(newUsernameField, 1, 0);
+
+        gridPane.add(emailLabel, 0, 1);
+        gridPane.add(emailField, 1, 1);
+
+        gridPane.add(passwordLabel, 0, 2);
+        gridPane.add(passwordField, 1, 2);
+
+
+        gridPane.add(nomLabel, 0, 3);
+        gridPane.add(nomField, 1, 3);
+
+        gridPane.add(prenomLabel, 0, 4);
+        gridPane.add(prenomField, 1, 4);
+
+        gridPane.add(userTypeLabel, 0, 5);
+        gridPane.add(userTypeField, 1, 5);
+
+
+        gridPane.add(fieldOfWorkLabel, 0, 6);
+        gridPane.add(fieldOfWorkField, 1, 6);
+
+        gridPane.add(ageLabel, 0, 7);
+        gridPane.add(ageField, 1, 7);
+
+        gridPane.add(dayLabel, 0, 8);
+        gridPane.add(dayField, 1, 8);
+
+        gridPane.add(monthLabel, 0, 9);
+        gridPane.add(monthField, 1, 9);
+
+        gridPane.add(yearLabel, 0, 10);
+        gridPane.add(yearField, 1, 10);
+
+
+
+        User updatedUser = new User();
+
+        updateButton = new Button("update user");
 
         //updateButton.setDisable(true); // Initially disabled until all fields are valid
         updateButton.setOnAction(e -> {
+            try {
+                updatedUser.setUsername(newUsernameField.getText().trim());
+                updatedUser.setNom(nomField.getText().trim());
+                updatedUser.setPrenom(prenomField.getText().trim());
+                updatedUser.setUserEmail(emailField.getText().trim());
+                updatedUser.setUserPassword(passwordField.getText().trim());
+                updatedUser.setFieldOfWork(fieldOfWorkField.getText().trim());
+                updatedUser.setAge(Integer.parseInt(ageField.getText().trim()));
+                updatedUser.setUserType(UserTypes.valueOf(userTypeField.getText().trim().toUpperCase()));
+                updatedUser.setMonthOfBirth(Integer.parseInt(monthField.getText().trim()));
+                updatedUser.setDayOfBirth(Integer.parseInt(dayField.getText().trim()));
+                updatedUser.setYearOfBirth(Integer.parseInt(yearField.getText().trim()));
+                // Validate the complete user object
+                UserValidator.validateUser(updatedUser);
 
-                try {
-                    user.setUsername(usernameField.getText().trim());
-                    user.setNom(nomField.getText().trim());
-                    user.setPrenom(prenomField.getText().trim());
-                    user.setUserEmail(emailField.getText().trim());
-                    user.setUserPassword(passwordField.getText().trim());
-                    user.setFieldOfWork(fieldOfWorkField.getText().trim());
-                    user.setAge(Integer.parseInt(ageField.getText().trim()));
-                    user.setUserType(UserTypes.valueOf(userTypeField.getText().trim().toUpperCase()));
-                    user.setMonthOfBirth(Integer.parseInt(monthField.getText().trim()));
-                    user.setDayOfBirth(Integer.parseInt(dayField.getText().trim()));
-                    user.setYearOfBirth(Integer.parseInt(yearField.getText().trim()));
-
-                    // Validate the complete user object
-                    UserValidator.validateUser(user);
-
-                    // Call the updateUser method with the updated User object
-                    UpdateUserService updateUserService = new UpdateUserService();
-                    updateUserService.updateUser(user,username);
-                    showAlert(Alert.AlertType.INFORMATION, "Success", "User updated successfully!");
-                    popupStage.close();
-                } catch (RegexValidationException ex) {
-                    showAlert(Alert.AlertType.ERROR, "Validation Error", ex.getMessage());
-                }
+                // Call the updateUser method with the updated User object
+                UpdateUserService updateUserService = new UpdateUserService();
+                updateUserService.updateUser(updatedUser,username);
+                logUserUpdate(updatedUser,username);
+                showAlert(Alert.AlertType.INFORMATION, "Success", "User updated successfully!");
+                popupStage.close();
+            } catch (RegexValidationException ex) {
+                showAlert(Alert.AlertType.ERROR, "Validation Error", ex.getMessage());
+            } catch (Exception ex) {
+                showAlert(Alert.AlertType.ERROR, "Error", "An error occurred while saving the user: " + ex.getMessage());
+            }
         });
 
 
@@ -192,6 +318,23 @@ public class UpdateUser extends Button {
     private void updateUpdateButtonState() {
         boolean allValid = validationStatus.values().stream().allMatch(valid -> valid);
         updateButton.setDisable(!allValid);
+    }
+
+
+
+    private void logUserUpdate(User user, String previous_username) {
+        String currentusername = ReceiveCurrentUsername.currentUsername;
+        User admin_user = GetUserService.getUserByUsername(currentusername);
+        String logFilePath = "logfile.txt"; // Specify the log file path
+        LocalDateTime now = LocalDateTime.now(); // Get the current date and time
+        String timestamp = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")); // Format the date and time
+        String logEntry = String.format("Updated by %s : %s - User: %s, To New User: %s, with email : %s, Password : %s%n",admin_user.getUserType(), timestamp, previous_username, user.getUsername(),user.getUserEmail(),user.getUserPassword());
+
+        try (FileWriter writer = new FileWriter(logFilePath, true)) { // Open the file in append mode
+            writer.write(logEntry);
+        } catch (IOException e) {
+            System.err.println("Error writing to log file: " + e.getMessage());
+        }
     }
 
 

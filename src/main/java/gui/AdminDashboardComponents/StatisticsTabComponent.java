@@ -17,6 +17,7 @@ public class StatisticsTabComponent extends Tab {
         VBox content = new VBox(statisticsComponent);
         content.setSpacing(10);
 
+
         // Set the content of the tab
         setContent(content);
     }

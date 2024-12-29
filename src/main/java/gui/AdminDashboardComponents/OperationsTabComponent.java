@@ -1,5 +1,7 @@
 package gui.AdminDashboardComponents;
 
+import data.model.User;
+import gui.components.MainComponent;
 import javafx.geometry.Pos;
 import gui.AdminButtons.*;
 import javafx.scene.control.Button;
@@ -11,9 +13,21 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import gui.components.LoginComponent;
+import service.*;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class OperationsTabComponent extends Tab {
-    public OperationsTabComponent(Stage primaryStage) {
+
+    private final AuthenticateUserService authService;
+    private final Stage primaryStage;
+    private static User my_user;
+    public OperationsTabComponent(Stage primaryStage, User user) {
+
+
         // Set the tab title
         this.setText("Operations");
 
@@ -22,6 +36,9 @@ public class OperationsTabComponent extends Tab {
         buttonContainer.setAlignment(Pos.CENTER);
         buttonContainer.setStyle("-fx-padding: 20px; -fx-background-color: #f5f5f5;");
 
+        this.authService = new AuthenticateUserService();
+        this.primaryStage = primaryStage;
+        this.my_user = user;
         // Create buttons using custom button classes with styling
         Button buttonSaveUser = styleButton(new SaveUser(), "#4CAF50"); // Green for create
         Button buttonGetUserByUsername = styleButton(new GetUserByUsername(), "#2196F3"); // Blue for search
@@ -98,18 +115,53 @@ public class OperationsTabComponent extends Tab {
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 // If the user clicks "OK", show the login screen
+                logUserLogout(this.my_user);
+                this.my_user = null;
                 showLoginScreen(primaryStage);
             }
             // If the user clicks "Cancel", nothing happens (so no need to do anything)
         });
     }
 
+
+
+    private void logUserLogout(User user) {
+        String logFilePath = "logfile.txt"; // Specify the log file path
+        LocalDateTime now = LocalDateTime.now(); // Get the current date and time
+        String timestamp = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")); // Format the date and time
+        String logEntry = String.format("Deconnexion : %s - User: %s, Type: %s%n", timestamp, user.getUsername(), user.getUserType());
+
+        try (FileWriter writer = new FileWriter(logFilePath, true)) { // Open the file in append mode
+            writer.write(logEntry);
+        } catch (IOException e) {
+            System.err.println("Error writing to log file: " + e.getMessage());
+        }
+    }
+
     private void showLoginScreen(Stage primaryStage) {
         // Create the LoginComponent and pass the necessary services
-        LoginComponent loginComponent = new LoginComponent(primaryStage, null, null);
+        AuthenticateUserService authService = new AuthenticateUserService();
+        LoginComponent loginComponent = new LoginComponent(primaryStage, authService, this::onClientLogin);
 
         // Set the scene to the LoginComponent
         primaryStage.setScene(new Scene(loginComponent, 300, 250)); // Adjust the size as necessary
         primaryStage.show();
     }
+
+    private void onClientLogin() {
+        // Handle actions after a client logs in
+        // For example, navigate to the client dashboard or main screen
+        System.out.println("Client logged in successfully!");
+        User new_user = new User();
+        String new_currentusername = ReceiveCurrentUsername.currentUsername;
+        new_user = GetUserService.getUserByUsername(new_currentusername);
+        JobInsertionService jobInsertionService = new JobInsertionService();
+        JobRetrievalService jobRetrievalService = new JobRetrievalService();
+        ScraperService scraperService = new ScraperService();
+        UserManagementService userManagementService = new UserManagementService();
+        MainComponent new_maincompo = new MainComponent(primaryStage, jobInsertionService, jobRetrievalService,scraperService,userManagementService,authService,new_user);
+        primaryStage.setScene(new Scene(new_maincompo, 1000, 600)); // Adjust the size as necessary
+        primaryStage.show();
+    }
+
 }
