@@ -194,7 +194,7 @@ public class MainComponent extends TabPane {
                 timer.cancel();
                 System.out.println("Timer canceled");
             }
-        }, 5000);
+        }, 50000);
     }
 
 
