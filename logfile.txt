@@ -218,3 +218,20 @@ Connexion : 2024-12-30 09:57:30 - User: iliaskhlifi, Type: ADMIN
 Deconnexion : 2024-12-30 09:58:07 - User: iliaskhlifi, Type: ADMIN
 Connexion : 2024-12-30 09:58:54 - User: mizzo, Type: CLIENT
 Connexion : 2024-12-30 10:03:05 - User: iliaskhlifi, Type: ADMIN
+Connexion : 2024-12-30 10:18:21 - User: mizzo, Type: CLIENT
+Connexion : 2024-12-30 10:30:57 - User: mizzo, Type: CLIENT
+Connexion : 2024-12-30 10:46:13 - User: mizzo, Type: CLIENT
+Deconnexion : 2024-12-30 11:07:16 - User: mizzo, Type: CLIENT
+Connexion : 2024-12-30 11:47:48 - User: iliaskhlifi, Type: ADMIN
+Deconnexion : 2024-12-30 11:49:53 - User: iliaskhlifi, Type: ADMIN
+Connexion : 2024-12-30 12:25:09 - User: mizzo, Type: CLIENT
+Deconnexion : 2024-12-30 12:25:18 - User: mizzo, Type: CLIENT
+Connexion : 2024-12-30 12:27:48 - User: mizzo, Type: CLIENT
+Deconnexion : 2024-12-30 12:27:54 - User: mizzo, Type: CLIENT
+Connexion : 2024-12-30 12:28:05 - User: iliaskhlifi, Type: ADMIN
+Deconnexion : 2024-12-30 12:28:10 - User: iliaskhlifi, Type: ADMIN
+Connexion : 2024-12-30 12:46:30 - User: mizzo, Type: CLIENT
+Update own profile : 2024-12-30 12:51:37 - User: mizzo, To New User: hamza, with email : elalaoui20hamz@gmail.com, Password : Pass1234@??
+Deconnexion : 2024-12-30 12:52:20 - User: mizzo, Type: CLIENT
+Connexion : 2024-12-30 12:52:35 - User: iliaskhlifi, Type: ADMIN
+Deconnexion : 2024-12-30 12:54:37 - User: iliaskhlifi, Type: ADMIN

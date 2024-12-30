@@ -117,12 +117,39 @@ public class MainComponent extends TabPane {
 
         Platform.runLater(() -> {
 
+
             primaryStage.setScene(new Scene(loginComponent, 300, 250)); // Adjust the size as necessary
             primaryStage.show();
 
         });
 
     }
+
+
+    private void showLoginScreen2() {
+        // Create the LoginComponent and pass necessary services
+        AuthenticateUserService authService = new AuthenticateUserService();
+        LoginComponent loginComponent = new LoginComponent(primaryStage, authService, this::onClientLogin);
+
+        // Set the scene to the LoginComponent
+
+        Platform.runLater(() -> {
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Session expired");          // Set the title of the alert
+            alert.setHeaderText("Time out");    // Set the header text (can be null)
+            alert.setContentText("Please login or register your time as a guest has run out");  // Set the content text
+
+            alert.showAndWait();
+            primaryStage.setScene(new Scene(loginComponent, 300, 250)); // Adjust the size as necessary
+            primaryStage.show();
+
+        });
+
+    }
+
+
+
 
     private void onClientLogin() {
         // Handle actions after a client logs in
@@ -190,11 +217,12 @@ public class MainComponent extends TabPane {
             @Override
             public void run() {
                 LoginComponent.nochance = 1;
-                showLoginScreen();
+
+                showLoginScreen2();
                 timer.cancel();
                 System.out.println("Timer canceled");
             }
-        }, 50000);
+        }, 5000);
     }
 
 
