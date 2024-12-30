@@ -197,3 +197,9 @@ Update own profile : 2024-12-29 04:02:21 - User: mizo, To New User: mizo, with e
 Deconnexion : 2024-12-29 04:02:27 - User: mizo, Type: CLIENT
 Connexion : 2024-12-29 04:02:36 - User: iliaskhlifi, Type: ADMIN
 Deconnexion : 2024-12-29 04:02:54 - User: iliaskhlifi, Type: ADMIN
+Connexion : 2024-12-29 13:05:45 - User: skuld, Type: CLIENT
+Update own profile : 2024-12-29 13:14:00 - User: skuld, To New User: skuld, with email : mohtaramhamz@gmail.com, Password : Pass1234??
+Deconnexion : 2024-12-29 13:14:52 - User: skuld, Type: CLIENT
+Connexion : 2024-12-29 13:15:34 - User: iliaskhlifi, Type: ADMIN
+Updated by ADMIN : 2024-12-29 13:19:54 - User: mizo, To New User: l3alima, with email : elalaoui20hamz@gmail.com, Password : Hamz@03!!
+Deconnexion : 2024-12-29 13:20:56 - User: iliaskhlifi, Type: ADMIN
