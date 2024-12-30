@@ -20,12 +20,12 @@ public class PredictionComponent extends Tab {
 
     public PredictionComponent(JobRetrievalService jobRetrievalService) {
         setText("Prediction"); // Set the tab title
-        
+
         this.jobRetrievalService = jobRetrievalService;
-        
+
         VBox content = new VBox();
         content.setSpacing(10);
-        
+
         predictionLabel = new Label("Give our model a job title and it will predict the experience you need:");
         jobTitleInput = new TextField();
         jobTitleInput.setPromptText("Enter job title (e.g., Product Manager)");
@@ -35,9 +35,9 @@ public class PredictionComponent extends Tab {
         predictButton = new Button("Predict");
 
         setupPredictButton();
-        
+
         content.getChildren().addAll(predictionLabel, jobTitleInput, predictButton, predictionOutput);
-        
+
         setContent(content); // Set the VBox as the tab's content
     }
 
@@ -49,12 +49,13 @@ public class PredictionComponent extends Tab {
                     Job predictedJob = EnhancedJobPrediction.predictJobDetails(jobTitle);
                     if (predictedJob != null) {
                         String prediction = String.format(
-                            "Closest job title: %s\n" +
-                            "Predicted Study Level: %s\n" +
-                            "Predicted Experience Level: %s",
-                            predictedJob.getTitle(),
-                            predictedJob.getEducationLevel(),
-                            predictedJob.getExperience()
+
+                                "Predicted Study Level: %s\n" +
+                                        "Predicted Experience Level: %s",
+
+
+                                predictedJob.getEducationLevel(),
+                                predictedJob.getExperience()
                         );
                         predictionOutput.setText(prediction);
                     } else {

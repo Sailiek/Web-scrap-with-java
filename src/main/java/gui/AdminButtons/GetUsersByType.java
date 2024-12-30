@@ -1,15 +1,15 @@
 package gui.AdminButtons;
 
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.scene.control.Alert;
+import service.GetUserByUsernameService;
 import service.GetUsersByTypeService;
 import data.model.User;
 import data.model.UserTypes; // Make sure this is the correct import for UserTypes enum
 import java.util.List;
+import java.util.Optional;
 
 public class GetUsersByType extends Button {
 
@@ -46,8 +46,8 @@ public class GetUsersByType extends Button {
             if (selectedType != null) {
                 // Call the service method with the selected UserType and get users
                 List<User> users = GetUsersByTypeService.getUsersByType(selectedType);
-                displayUsersInPopup(users); // Show the users in a popup
-                stage.close(); // Close the selection dialog
+                displayUsersInPopup(users, selectedType, stage); // Show the users in a popup
+                //stage.close(); // Close the selection dialog
             } else {
                 showAlert("Error", "Please select a valid user type.");
             }
@@ -58,7 +58,8 @@ public class GetUsersByType extends Button {
     }
 
     // This method displays the users based on the selected type in a new popup
-    private void displayUsersInPopup(List<User> users) {
+    private void displayUsersInPopup(List<User> users, UserTypes selectedType, Stage stage) {
+        stage.close();
         if (users.isEmpty()) {
             showAlert("No Users Found", "No users found for the selected type.");
         } else {
@@ -67,10 +68,37 @@ public class GetUsersByType extends Button {
                 userDetails.append(user.getUsername()).append("\n"); // Modify to show relevant details
             }
 
-            // Create and display an alert with the user list
-            showAlert("Users by Type", userDetails.toString());
+            // Using Alert instead of TextInputDialog
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Usernames");
+            alert.setHeaderText("Users for type: " + selectedType);
+
+            // Use TextArea for better layout of usernames
+            TextArea textArea = new TextArea(userDetails.toString());
+            textArea.setEditable(false);
+            textArea.setWrapText(true);
+
+            alert.getDialogPane().setContent(textArea);
+            alert.showAndWait();
         }
     }
+
+
+
+    private void showUsernameInputDialog() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Enter Username");
+        dialog.setHeaderText("Please enter the USERNAME of the user you want to retrieve:");
+        dialog.setContentText("Username:");
+
+        // Show the dialog and capture the result
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(username -> {
+            GetUserByUsernameService.getUserByUsername(username);
+        });
+    }
+
 
     // Helper method to show alerts
     private void showAlert(String title, String message) {

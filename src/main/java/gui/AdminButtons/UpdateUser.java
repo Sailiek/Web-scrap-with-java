@@ -93,99 +93,59 @@ public class UpdateUser extends Button {
         Stage popupStage = new Stage();
         popupStage.setTitle("Update User");
 
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(10));
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+
         // Create input fields with validation
-        //TextField usernameField = createInputField("Username:", gridPane, 0, user.getUsername());
+        TextField usernameField = createInputField("Username:", gridPane, 0, user.getUsername());
 
-        //TextField nomField = createInputField("Nom:", gridPane, 1, user.getNom());
-
-
-        //TextField prenomField = createInputField("Prenom:", gridPane, 2, user.getPrenom());
+        TextField nomField = createInputField("Nom:", gridPane, 1, user.getNom());
 
 
-        //TextField emailField = createInputField("Email:", gridPane, 3, user.getUserEmail());
+        TextField prenomField = createInputField("Prenom:", gridPane, 2, user.getPrenom());
 
 
-        //TextField passwordField = createInputField("Password:", gridPane, 4, user.getUserPassword());
+        TextField emailField = createInputField("Email:", gridPane, 3, user.getUserEmail());
 
 
-        //TextField fieldOfWorkField = createInputField("Field of Work:", gridPane, 5, user.getFieldOfWork());
+        TextField passwordField = createInputField("Password:", gridPane, 4, user.getUserPassword());
 
 
-        //TextField ageField = createInputField("Age:", gridPane, 6, String.valueOf(user.getAge()));
+        TextField fieldOfWorkField = createInputField("Field of Work:", gridPane, 5, user.getFieldOfWork());
 
 
-        //TextField userTypeField = createInputField("User Type:", gridPane, 7, user.getUserType().toString());
+        TextField ageField = createInputField("Age:", gridPane, 6, String.valueOf(user.getAge()));
+
+
+        ComboBox<UserTypes> userTypeComboBox = createUserTypeComboBox("User Type:", gridPane, 7, user.getUserType());
 
 
         // Create date fields with validation
-        //TextField dayField = createInputField("Day of Birth (1-31):", gridPane, 8, String.valueOf(user.getDayOfBirth()));
+        TextField dayField = createInputField("Day of Birth (1-31):", gridPane, 8, String.valueOf(user.getDayOfBirth()));
 
 
-        //TextField monthField = createInputField("Month of Birth (1-12):", gridPane, 9, String.valueOf(user.getMonthOfBirth()));
+        TextField monthField = createInputField("Month of Birth (1-12):", gridPane, 9, String.valueOf(user.getMonthOfBirth()));
 
 
-        //TextField yearField = createInputField("Year of Birth (1900-2023):", gridPane, 10, String.valueOf(user.getYearOfBirth()));
+        TextField yearField = createInputField("Year of Birth (1900-2023):", gridPane, 10, String.valueOf(user.getYearOfBirth()));
 
 
 
 
-        Label newUsernameLabel = new Label("Username:");
-        TextField newUsernameField = new TextField(user.getUsername());
-        newUsernameField.setDisable(false);
-        newUsernameField.setEditable(true);
-
-        Label emailLabel = new Label("Email:");
-        TextField emailField = new TextField(user.getUserEmail());
-        emailField.setDisable(false);
-        emailField.setEditable(true);
-
-        Label passwordLabel = new Label("Password:");
-        TextField passwordField = new TextField(user.getUserPassword());
-        passwordField.setDisable(false);
-        passwordField.setEditable(true);
 
 
-        Label nomLabel = new Label("Nom:");
-        TextField nomField = new TextField(user.getNom());
-        newUsernameField.setDisable(false);
-        newUsernameField.setEditable(true);
 
-        Label prenomLabel = new Label("Prenom:");
-        TextField prenomField = new TextField(user.getPrenom());
-        emailField.setDisable(false);
-        emailField.setEditable(true);
-
-        Label fieldOfWorkLabel = new Label("field of work :");
-        TextField fieldOfWorkField = new TextField(user.getFieldOfWork());
-        passwordField.setDisable(false);
-        passwordField.setEditable(true);
+        userTypeComboBox.setOnAction(e -> {
+            UserTypes selectedType = userTypeComboBox.getValue();
+            boolean isValid = validateField(() -> UserValidator.validateUserType(selectedType));
+            updateErrorLabel(userTypeComboBox, isValid);
+        });
 
 
-        Label ageLabel = new Label("Age:");
-        TextField ageField = new TextField(String.valueOf(user.getAge()));
-        newUsernameField.setDisable(false);
-        newUsernameField.setEditable(true);
-
-        Label userTypeLabel = new Label("Email:");
-        TextField userTypeField = new TextField(String.valueOf(user.getUserType()));
-        emailField.setDisable(false);
-        emailField.setEditable(true);
-
-        Label dayLabel = new Label("Day of birth:");
-        TextField dayField = new TextField(String.valueOf(user.getDayOfBirth()));
-        passwordField.setDisable(false);
-        passwordField.setEditable(true);
 
 
-        Label monthLabel = new Label("Month of birth:");
-        TextField monthField = new TextField(String.valueOf(user.getMonthOfBirth()));
-        emailField.setDisable(false);
-        emailField.setEditable(true);
-
-        Label yearLabel = new Label("Year of birth:");
-        TextField yearField = new TextField(String.valueOf(user.getYearOfBirth()));
-        passwordField.setDisable(false);
-        passwordField.setEditable(true);
 
 
 
@@ -196,49 +156,6 @@ public class UpdateUser extends Button {
 
 
 
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(10));
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
-
-
-
-        gridPane.add(newUsernameLabel, 0, 0);
-        gridPane.add(newUsernameField, 1, 0);
-
-        gridPane.add(emailLabel, 0, 1);
-        gridPane.add(emailField, 1, 1);
-
-        gridPane.add(passwordLabel, 0, 2);
-        gridPane.add(passwordField, 1, 2);
-
-
-        gridPane.add(nomLabel, 0, 3);
-        gridPane.add(nomField, 1, 3);
-
-        gridPane.add(prenomLabel, 0, 4);
-        gridPane.add(prenomField, 1, 4);
-
-        gridPane.add(userTypeLabel, 0, 5);
-        gridPane.add(userTypeField, 1, 5);
-
-
-        gridPane.add(fieldOfWorkLabel, 0, 6);
-        gridPane.add(fieldOfWorkField, 1, 6);
-
-        gridPane.add(ageLabel, 0, 7);
-        gridPane.add(ageField, 1, 7);
-
-        gridPane.add(dayLabel, 0, 8);
-        gridPane.add(dayField, 1, 8);
-
-        gridPane.add(monthLabel, 0, 9);
-        gridPane.add(monthField, 1, 9);
-
-        gridPane.add(yearLabel, 0, 10);
-        gridPane.add(yearField, 1, 10);
-
-
 
         User updatedUser = new User();
 
@@ -247,14 +164,14 @@ public class UpdateUser extends Button {
         //updateButton.setDisable(true); // Initially disabled until all fields are valid
         updateButton.setOnAction(e -> {
             try {
-                updatedUser.setUsername(newUsernameField.getText().trim());
+                updatedUser.setUsername(usernameField.getText().trim());
                 updatedUser.setNom(nomField.getText().trim());
                 updatedUser.setPrenom(prenomField.getText().trim());
                 updatedUser.setUserEmail(emailField.getText().trim());
                 updatedUser.setUserPassword(passwordField.getText().trim());
                 updatedUser.setFieldOfWork(fieldOfWorkField.getText().trim());
                 updatedUser.setAge(Integer.parseInt(ageField.getText().trim()));
-                updatedUser.setUserType(UserTypes.valueOf(userTypeField.getText().trim().toUpperCase()));
+                updatedUser.setUserType(userTypeComboBox.getValue());
                 updatedUser.setMonthOfBirth(Integer.parseInt(monthField.getText().trim()));
                 updatedUser.setDayOfBirth(Integer.parseInt(dayField.getText().trim()));
                 updatedUser.setYearOfBirth(Integer.parseInt(yearField.getText().trim()));
@@ -328,13 +245,32 @@ public class UpdateUser extends Button {
         String logFilePath = "logfile.txt"; // Specify the log file path
         LocalDateTime now = LocalDateTime.now(); // Get the current date and time
         String timestamp = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")); // Format the date and time
-        String logEntry = String.format("Updated by %s : %s - User: %s, To New User: %s, with email : %s, Password : %s%n",admin_user.getUserType(), timestamp, previous_username, user.getUsername(),user.getUserEmail(),user.getUserPassword());
+        String logEntry = String.format("Updated by Admin %s : %s - User: %s, To New User: %s, with email : %s, Password : %s%n",admin_user.getUsername(), timestamp, previous_username, user.getUsername(),user.getUserEmail(),user.getUserPassword());
 
         try (FileWriter writer = new FileWriter(logFilePath, true)) { // Open the file in append mode
             writer.write(logEntry);
         } catch (IOException e) {
             System.err.println("Error writing to log file: " + e.getMessage());
         }
+    }
+
+
+    private ComboBox<UserTypes> createUserTypeComboBox(String labelText, GridPane gridPane, int row, UserTypes type) {
+        Label label = new Label(labelText);
+        ComboBox<UserTypes> comboBox = new ComboBox<>();
+        Label errorLabel = new Label();
+        errorLabel.setTextFill(Color.RED);
+        errorLabel.setWrapText(true);
+        errorLabel.setMaxWidth(300);
+
+        comboBox.getItems().addAll(UserTypes.values());
+        comboBox.setValue(type); // Set the default value
+
+        gridPane.add(label, 0, row);
+        gridPane.add(comboBox, 1, row);
+        gridPane.add(errorLabel, 2, row);
+
+        return comboBox;
     }
 
 

@@ -46,13 +46,13 @@ public class User {
     // Default constructor
     public User() {
         this.nom = "Doe";
-        this.prenom = "Joe";
+       this.prenom = "Joe";
         this.userEmail = "JoeDoe@example.com";
         this.username = "JoeDoe1";
         this.userPassword = "Pass123";
         this.fieldOfWork = "Engineering";
         this.age = 30;
-        this.userType = UserTypes.GUEST;
+        this.userType = UserTypes.CLIENT;
         this.monthOfBirth = 1;
         this.dayOfBirth = 1;
         this.yearOfBirth = 1990;

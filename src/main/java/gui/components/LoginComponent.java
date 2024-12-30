@@ -112,7 +112,7 @@ public class LoginComponent extends VBox {
             UserTypes userType = user.getUserType();
             logUserLogin(username, userType); // Log the successful login
 
-            if (userType == UserTypes.ADMIN || userType == UserTypes.SUPERADMIN) {
+            if (userType == UserTypes.ADMIN) {
                 currentusername = username;
                 ReceiveCurrentUsername.currentUsername = currentusername;
                 new AdminDashboard(primaryStage);

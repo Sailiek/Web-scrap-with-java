@@ -170,13 +170,11 @@ public final class jobRecommendation {
             // Apply Weka's J48 decision tree classifier
             J48 j48 = new J48();
             j48.buildClassifier(data);
-            System.out.println("Weka J48 Model trained successfully.");
 
             // Save the model to disk (for future use in predictions)
             weka.core.SerializationHelper.write("jobRecommendationModel.model", j48);
 
             // Evaluate model performance using cross-validation
-            evaluateModel(data, j48);
 
         } catch (Exception e) {
             System.out.println("Error with Weka: " + e.getMessage());
@@ -197,23 +195,7 @@ public final class jobRecommendation {
         }
     }
 
-    private static void evaluateModel(Instances data, J48 j48) {
-        try {
-            // Perform 10-fold cross-validation for evaluation
-            weka.classifiers.Evaluation evaluation = new weka.classifiers.Evaluation(data);
-            evaluation.crossValidateModel(j48, data, 10, new Random(1));
 
-            System.out.println("\nModel Evaluation Results:");
-            System.out.println("Correctly Classified Instances: " + evaluation.pctCorrect() + "%");
-            System.out.println("Incorrectly Classified Instances: " + evaluation.pctIncorrect() + "%");
-            System.out.println("Precision: " + evaluation.precision(0));
-            System.out.println("Recall: " + evaluation.recall(0));
-            System.out.println("F-Measure: " + evaluation.fMeasure(0));
-
-        } catch (Exception e) {
-            System.out.println("Error evaluating model: " + e.getMessage());
-        }
-    }
 
 
     public static void predictJobClassification(Job jobToClassify) {
@@ -242,9 +224,6 @@ public final class jobRecommendation {
             // Perform prediction
             double predictedClass = j48.classifyInstance(data.instance(0));
 
-            // Output the prediction
-            System.out.println("Predicted Class: " + (predictedClass == 1 ? "CDI" : "Not CDI"));
-
         } catch (Exception e) {
             System.out.println("Error making prediction: " + e.getMessage());
         }
@@ -261,8 +240,6 @@ public final class jobRecommendation {
             // Train the classifier and save the model
             trainJobClassifier(jobList);
 
-            // Ask user for a target job and make predictions
-            System.out.println("Enter the job title to classify (or press enter to skip):");
             String targetJobTitle = scanner.nextLine();
             Job targetJob = jobList.stream()
                     .filter(job -> job.jobTitle.equalsIgnoreCase(targetJobTitle))

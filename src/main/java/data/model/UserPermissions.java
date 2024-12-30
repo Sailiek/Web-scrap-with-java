@@ -52,8 +52,6 @@ public class UserPermissions {
                 return CLIENT_PERMISSIONS;
             case ADMIN:
                 return ADMIN_PERMISSIONS;
-            case SUPERADMIN:
-                return SUPERADMIN_PERMISSIONS;
             default:
                 return Collections.emptySet();
         }
